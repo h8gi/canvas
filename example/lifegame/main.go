@@ -19,6 +19,7 @@ func main() {
 
 	world := NewWorld(200, 150)
 
+	// see https://github.com/fogleman/gg
 	c.Main(func(dc *gg.Context) {
 		world.Update()
 		for y := 0; y < dc.Height(); y++ {
