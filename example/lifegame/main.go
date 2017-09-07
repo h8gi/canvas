@@ -1,11 +1,11 @@
 package main
 
 import (
-	"image"
 	"math/rand"
 
 	"golang.org/x/image/colornames"
 
+	"github.com/fogleman/gg"
 	"github.com/h8gi/boids/canvas"
 )
 
@@ -14,21 +14,21 @@ func main() {
 
 	c.Option(
 		canvas.FrameRate(60),
-		canvas.Size(300, 300),
+		canvas.Size(200, 150),
 	)
 
-	world := NewWorld(300, 300)
+	world := NewWorld(200, 150)
 
-	c.Main(func(img *image.RGBA) {
+	c.MainWithDC(func(dc *gg.Context) {
 		world.Update()
-		b := img.Bounds()
-		for y := b.Min.Y; y < b.Max.Y; y++ {
-			for x := b.Min.X; x < b.Max.X; x++ {
+		for y := 0; y < dc.Height(); y++ {
+			for x := 0; x < dc.Width(); x++ {
 				if world.IsAliveAt(x, y) {
-					img.SetRGBA(x, y, colornames.White)
+					dc.SetColor(colornames.White)
 				} else {
-					img.SetRGBA(x, y, colornames.Black)
+					dc.SetColor(colornames.Black)
 				}
+				dc.SetPixel(x, y)
 			}
 		}
 	})
