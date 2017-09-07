@@ -1,3 +1,4 @@
+// very simple boids simulation.
 package main
 
 import (
