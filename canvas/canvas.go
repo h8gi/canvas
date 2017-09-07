@@ -10,6 +10,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fogleman/gg"
+
 	"golang.org/x/exp/shiny/driver"
 	"golang.org/x/exp/shiny/screen"
 	"golang.org/x/mobile/event/key"
@@ -31,6 +33,7 @@ type Canvas struct {
 		mu              sync.Mutex
 		uploadEventSent bool
 		img             *image.RGBA
+		dc              *gg.Context
 	}
 }
 
@@ -55,15 +58,16 @@ func Size(width, height int) option {
 	return func(c *Canvas) {
 		c.width = width
 		c.height = height
+		c.shared.dc = gg.NewContext(width, height)
 	}
 }
 
 func New() *Canvas {
-	c := &Canvas{
-		width:     600,
-		height:    400,
-		frameRate: 60,
-	}
+	c := &Canvas{}
+	c.Option(
+		Size(600, 400),
+		FrameRate(60),
+	)
 	return c
 }
 
@@ -72,6 +76,16 @@ func (c *Canvas) Main(f func(*image.RGBA)) {
 	c.drawFunc = func() {
 		c.shared.mu.Lock()
 		f(c.shared.img)
+		c.shared.mu.Unlock()
+	}
+	c.start()
+}
+
+func (c *Canvas) MainWithDC(f func(*gg.Context)) {
+	c.drawFunc = func() {
+		c.shared.mu.Lock()
+		f(c.shared.dc)
+		copy(c.shared.img.Pix, c.shared.dc.Image().(*image.RGBA).Pix)
 		c.shared.mu.Unlock()
 	}
 	c.start()

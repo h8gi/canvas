@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"image"
 	"math/rand"
 
 	"github.com/fogleman/gg"
@@ -17,8 +16,8 @@ func main() {
 	)
 	w := NewWorld(5)
 
-	c.Main(func(img *image.RGBA) {
-		w.Draw(img)
+	c.MainWithDC(func(dc *gg.Context) {
+		w.Draw(dc)
 		w.Update()
 	})
 }
@@ -81,8 +80,7 @@ func (w *World) Update() {
 	}
 }
 
-func (w *World) Draw(img *image.RGBA) {
-	dc := gg.NewContextForRGBA(img)
+func (w *World) Draw(dc *gg.Context) {
 	dc.SetRGB(0, 0, 0)
 	dc.Clear()
 	dc.SetRGB(0, 1, 0)
@@ -91,5 +89,4 @@ func (w *World) Draw(img *image.RGBA) {
 		dc.DrawCircle(b.Position[0], b.Position[1], 10)
 		dc.Fill()
 	}
-	img.Pix = dc.Image().(*image.RGBA).Pix
 }
