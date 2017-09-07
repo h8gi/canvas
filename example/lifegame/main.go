@@ -19,7 +19,7 @@ func main() {
 
 	world := NewWorld(200, 150)
 
-	c.MainWithDC(func(dc *gg.Context) {
+	c.Main(func(dc *gg.Context) {
 		world.Update()
 		for y := 0; y < dc.Height(); y++ {
 			for x := 0; x < dc.Width(); x++ {

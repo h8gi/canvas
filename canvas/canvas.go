@@ -32,7 +32,6 @@ type Canvas struct {
 	shared    struct {
 		mu              sync.Mutex
 		uploadEventSent bool
-		img             *image.RGBA
 		dc              *gg.Context
 	}
 }
@@ -58,7 +57,6 @@ func Size(width, height int) option {
 	return func(c *Canvas) {
 		c.width = width
 		c.height = height
-		c.shared.dc = gg.NewContext(width, height)
 	}
 }
 
@@ -72,20 +70,10 @@ func New() *Canvas {
 }
 
 // start main loop
-func (c *Canvas) Main(f func(*image.RGBA)) {
-	c.drawFunc = func() {
-		c.shared.mu.Lock()
-		f(c.shared.img)
-		c.shared.mu.Unlock()
-	}
-	c.start()
-}
-
-func (c *Canvas) MainWithDC(f func(*gg.Context)) {
+func (c *Canvas) Main(f func(*gg.Context)) {
 	c.drawFunc = func() {
 		c.shared.mu.Lock()
 		f(c.shared.dc)
-		copy(c.shared.img.Pix, c.shared.dc.Image().(*image.RGBA).Pix)
 		c.shared.mu.Unlock()
 	}
 	c.start()
@@ -131,9 +119,8 @@ func (c *Canvas) start() {
 		}
 		defer tex.Release()
 		tex.Fill(tex.Bounds(), color.White, draw.Src)
-
-		c.shared.img = image.NewRGBA(b.Bounds())
-		copy(c.shared.img.Pix, b.RGBA().Pix)
+		// initialize draw context
+		c.shared.dc = gg.NewContextForRGBA(b.RGBA())
 
 		// invoke timer event
 		go c.simulate(w)
@@ -160,7 +147,8 @@ func (c *Canvas) start() {
 
 			case TickEvent:
 				c.shared.mu.Lock()
-				copy(b.RGBA().Pix, c.shared.img.Pix)
+				// copy image from shared memory
+				copy(b.RGBA().Pix, c.shared.dc.Image().(*image.RGBA).Pix)
 				c.shared.mu.Unlock()
 				tex.Upload(image.Point{}, b, b.Bounds())
 				publish = true

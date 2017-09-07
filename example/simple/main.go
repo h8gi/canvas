@@ -16,7 +16,7 @@ func main() {
 	)
 	w := NewWorld(5)
 
-	c.MainWithDC(func(dc *gg.Context) {
+	c.Main(func(dc *gg.Context) {
 		w.Draw(dc)
 		w.Update()
 	})
