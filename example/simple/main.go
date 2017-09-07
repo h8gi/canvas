@@ -1,9 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"math"
 	"math/rand"
-	"os"
 
 	"github.com/fogleman/gg"
 	"github.com/h8gi/boids/canvas"
@@ -16,35 +15,62 @@ func main() {
 		canvas.Size(400, 400),
 	)
 	w := NewWorld(5)
-	counter := 0
 	c.Main(func(dc *gg.Context) {
-		if counter > 100 {
-			os.Exit(0)
-		}
 		w.Draw(dc)
-		dc.SavePNG(fmt.Sprintf("%04d.png", counter))
 		w.Update()
-		counter++
 	})
 }
 
-type Vector [2]float64
+type Vec2D [2]float64
 
-func (v Vector) Add(other Vector) Vector {
-	return Vector{v[0] + other[0], v[1] + other[1]}
+func (a Vec2D) Add(b Vec2D) Vec2D {
+	return Vec2D{a[0] + b[0], a[1] + b[1]}
+}
+
+func (a Vec2D) Mag() float64 {
+	return math.Sqrt(a[0]*a[0] + a[1]*a[1])
+}
+
+func (a Vec2D) Scale(k float64) Vec2D {
+	return Vec2D{k * a[0], k * a[1]}
+}
+
+func (a Vec2D) Unit() Vec2D {
+	return a.Scale(1 / a.Mag())
+}
+
+func (a Vec2D) Dot(b Vec2D) float64 {
+	return a[0]*b[0] + a[1]*b[1]
+}
+
+func (a Vec2D) Rotate(rad float64) Vec2D {
+	return Vec2D{
+		a[0]*math.Cos(rad) - a[1]*math.Sin(rad),
+		a[0]*math.Sin(rad) + a[1]*math.Cos(rad),
+	}
+
 }
 
 type Boid struct {
-	Position Vector
-	Velocity Vector
+	Position Vec2D
+	Velocity Vec2D
 }
 
 func NewRandomBoid() *Boid {
 	b := &Boid{
-		Position: Vector{rand.Float64(), rand.Float64()},
-		Velocity: Vector{rand.Float64(), rand.Float64()},
+		Position: Vec2D{0.5, 0.5},
+		Velocity: Vec2D{rand.Float64(), rand.Float64()},
 	}
 	return b
+}
+
+func (b *Boid) Forward() {
+	b.Position = b.Position.Add(b.Velocity)
+}
+
+func (b *Boid) Wiggle(s float64) {
+	rad := (2*math.Pi*rand.Float64() - math.Pi) * s
+	b.Velocity = b.Velocity.Rotate(rad)
 }
 
 type World struct {
@@ -66,7 +92,8 @@ func NewWorld(n int) (w *World) {
 func (w *World) Update() {
 	for i := range w.Boids {
 		b := w.Boids[i]
-		b.Position = b.Position.Add(b.Velocity)
+		b.Wiggle(0.05)
+		b.Forward()
 	}
 }
 

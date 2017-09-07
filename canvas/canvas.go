@@ -76,7 +76,7 @@ func (c *Canvas) Main(f func(*gg.Context)) {
 		f(c.shared.dc)
 		c.shared.mu.Unlock()
 	}
-	c.start()
+	c.startLoop()
 }
 
 // start inner simulation loop
@@ -90,7 +90,7 @@ func (c *Canvas) simulate(q screen.EventDeque) {
 	}
 }
 
-func (c *Canvas) start() {
+func (c *Canvas) startLoop() {
 	rand.Seed(time.Now().UnixNano())
 
 	driver.Main(func(s screen.Screen) {
