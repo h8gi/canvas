@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 
 	"github.com/fogleman/gg"
 	"github.com/h8gi/boids/canvas"
@@ -15,10 +16,15 @@ func main() {
 		canvas.Size(400, 400),
 	)
 	w := NewWorld(5)
-
+	counter := 0
 	c.Main(func(dc *gg.Context) {
+		if counter > 100 {
+			os.Exit(0)
+		}
 		w.Draw(dc)
+		dc.SavePNG(fmt.Sprintf("%04d.png", counter))
 		w.Update()
+		counter++
 	})
 }
 
@@ -31,13 +37,6 @@ func (v Vector) Add(other Vector) Vector {
 type Boid struct {
 	Position Vector
 	Velocity Vector
-	// neighborhood parameter
-	Angle    float64
-	Distance float64
-}
-
-func (b *Boid) String() string {
-	return fmt.Sprintf("{pos: %v, vel: %v}", b.Position, b.Velocity)
 }
 
 func NewRandomBoid() *Boid {
@@ -52,15 +51,6 @@ type World struct {
 	Boids  []*Boid
 	Width  int
 	Height int
-}
-
-func (w *World) String() string {
-	s := ""
-	for i := range w.Boids {
-		b := w.Boids[i]
-		s += b.String() + " "
-	}
-	return s
 }
 
 func NewWorld(n int) (w *World) {

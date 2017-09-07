@@ -46,9 +46,9 @@ func (c *Canvas) Option(opts ...option) {
 	}
 }
 
-func FrameRate(r int) option {
+func FrameRate(fps int) option {
 	return func(c *Canvas) {
-		c.frameRate = r
+		c.frameRate = fps
 	}
 }
 
