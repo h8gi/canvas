@@ -1,4 +1,4 @@
-// simple boids viewer
+// simple animation library
 package canvas
 
 import (

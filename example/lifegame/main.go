@@ -6,7 +6,7 @@ import (
 	"golang.org/x/image/colornames"
 
 	"github.com/fogleman/gg"
-	"github.com/h8gi/boids/canvas"
+	"github.com/h8gi/canvas"
 )
 
 func main() {
