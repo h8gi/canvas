@@ -9,21 +9,25 @@ import (
 )
 
 func main() {
-	c := canvas.New()
-	c.Option(
-		canvas.FrameRate(60),
-		canvas.Size(400, 400),
-	)
-	w := NewWorld(5)
-
-	c.Setup(func(dc *canvas.Context) {
-		dc.SetRGB(0, 0, 1)
-		dc.Clear()
+	c := canvas.New(&canvas.NewCanvasOptions{
+		Width:     400,
+		Height:    400,
+		FrameRate: 20,
+		Title:     "hello",
 	})
 
-	c.Draw(func(dc *canvas.Context) {
-		w.Draw(dc)
+	w := NewWorld(5)
+
+	c.Setup(func(ctx *canvas.Context) {
+		ctx.SetRGB(0, 0, 1)
+		ctx.Clear()
+	})
+
+	c.StartLoop(func(ctx *canvas.Context) {
+		w.Draw(ctx)
 		w.Update()
+		ctx.DrawCircle(float64(ctx.MouseEvent().X), float64(ctx.MouseEvent().Y), 2)
+		ctx.Fill()
 	})
 }
 
@@ -103,11 +107,11 @@ func (w *World) Update() {
 	}
 }
 
-func (w *World) Draw(dc *canvas.Context) {
-	dc.SetRGB(0, 1, 0)
+func (w *World) Draw(ctx *canvas.Context) {
+	ctx.SetRGB(0, 1, 0)
 	for i := range w.Boids {
 		b := w.Boids[i]
-		dc.DrawCircle(b.Position[0], b.Position[1], 10)
-		dc.Fill()
+		ctx.DrawCircle(b.Position[0], b.Position[1], 10)
+		ctx.Fill()
 	}
 }
