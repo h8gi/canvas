@@ -12,7 +12,8 @@ import (
 
 type Context struct {
 	gg.Context
-	mu          sync.Mutex
+	mu sync.Mutex
+	// mouse coordinates are rescaled by window size.
 	mouseEvents [2]mouse.Event
 }
 

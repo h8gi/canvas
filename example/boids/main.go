@@ -2,8 +2,11 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
+
+	"golang.org/x/mobile/event/mouse"
 
 	"github.com/h8gi/canvas"
 )
@@ -26,7 +29,13 @@ func main() {
 	c.StartLoop(func(ctx *canvas.Context) {
 		w.Draw(ctx)
 		w.Update()
-		ctx.DrawCircle(float64(ctx.MouseEvent().X), float64(ctx.MouseEvent().Y), 2)
+		if ctx.MouseEvent().Direction == mouse.DirPress {
+			ctx.DrawLine(
+				float64(ctx.PreviousMouseEvent().X), float64(ctx.PreviousMouseEvent().Y),
+				float64(ctx.MouseEvent().X), float64(ctx.MouseEvent().Y),
+			)
+		}
+		fmt.Println(ctx.MouseEvent().X, ctx.MouseEvent().Y)
 		ctx.Fill()
 	})
 }

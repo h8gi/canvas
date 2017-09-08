@@ -19,7 +19,7 @@ import (
 )
 
 // timer event
-type TickEvent struct{}
+type tickEvent struct{}
 
 // drawing area
 type Canvas struct {
@@ -92,7 +92,7 @@ func (c *Canvas) simulate(q screen.EventDeque) {
 	for {
 		// memory lock
 		c.drawFunc()
-		q.Send(TickEvent{})
+		q.Send(tickEvent{})
 		time.Sleep(duration)
 	}
 }
@@ -150,10 +150,13 @@ func (c *Canvas) startLoop() {
 				}
 			case mouse.Event:
 				m = e
+				// rescaling mouse coord
+				m.Y = float32(c.height) * (m.Y / float32(sz.HeightPx))
+				m.X = float32(c.width) * (m.X / float32(sz.WidthPx))
 			case paint.Event:
 				publish = true
 
-			case TickEvent:
+			case tickEvent:
 				// push latest mouse event to context
 				c.context.mu.Lock()
 				c.context.pushMouseEvent(m)
