@@ -13,14 +13,14 @@ func main() {
 	c := canvas.New()
 
 	c.Option(
-		canvas.FrameRate(60),
+		canvas.FrameRate(2),
 		canvas.Size(200, 150),
 	)
 
 	world := NewWorld(200, 150)
 
 	// see https://github.com/fogleman/gg
-	c.Main(func(dc *gg.Context) {
+	c.Draw(func(dc *gg.Context) {
 		world.Update()
 		for y := 0; y < dc.Height(); y++ {
 			for x := 0; x < dc.Width(); x++ {

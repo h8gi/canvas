@@ -22,7 +22,7 @@ func main() {
 	world := NewWorld(200, 150)
 
 	counter := 0
-	c.Main(func(dc *gg.Context) {
+	c.Draw(func(dc *gg.Context) {
 		if counter > 300 {
 			os.Exit(0)
 		}

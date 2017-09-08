@@ -7,10 +7,7 @@ import (
 	"image/draw"
 	"log"
 	"math/rand"
-	"sync"
 	"time"
-
-	"github.com/fogleman/gg"
 
 	"golang.org/x/exp/shiny/driver"
 	"golang.org/x/exp/shiny/screen"
@@ -28,12 +25,9 @@ type Canvas struct {
 	width     int
 	height    int
 	frameRate int
+	initFunc  func()
 	drawFunc  func()
-	shared    struct {
-		mu              sync.Mutex
-		uploadEventSent bool
-		dc              *gg.Context
-	}
+	context   *Context
 }
 
 // self-referential functions pattern
@@ -57,6 +51,7 @@ func Size(width, height int) option {
 	return func(c *Canvas) {
 		c.width = width
 		c.height = height
+		c.context = NewContext(width, height)
 	}
 }
 
@@ -69,12 +64,19 @@ func New() *Canvas {
 	return c
 }
 
+// initialize
+func (c *Canvas) Setup(f func(*Context)) {
+	c.context.mu.Lock()
+	f(c.context)
+	c.context.mu.Unlock()
+}
+
 // start main loop
-func (c *Canvas) Main(f func(*gg.Context)) {
+func (c *Canvas) Draw(f func(*Context)) {
 	c.drawFunc = func() {
-		c.shared.mu.Lock()
-		f(c.shared.dc)
-		c.shared.mu.Unlock()
+		c.context.mu.Lock()
+		f(c.context)
+		c.context.mu.Unlock()
 	}
 	c.startLoop()
 }
@@ -119,8 +121,6 @@ func (c *Canvas) startLoop() {
 		}
 		defer tex.Release()
 		tex.Fill(tex.Bounds(), color.White, draw.Src)
-		// initialize draw context
-		c.shared.dc = gg.NewContextForRGBA(b.RGBA())
 
 		// invoke timer event
 		go c.simulate(w)
@@ -146,10 +146,10 @@ func (c *Canvas) startLoop() {
 				publish = true
 
 			case TickEvent:
-				c.shared.mu.Lock()
+				c.context.mu.Lock()
 				// copy image from shared memory
-				copy(b.RGBA().Pix, c.shared.dc.Image().(*image.RGBA).Pix)
-				c.shared.mu.Unlock()
+				copy(b.RGBA().Pix, c.context.Image().(*image.RGBA).Pix)
+				c.context.mu.Unlock()
 				tex.Upload(image.Point{}, b, b.Bounds())
 				publish = true
 

@@ -5,7 +5,6 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/fogleman/gg"
 	"github.com/h8gi/canvas"
 )
 
@@ -16,7 +15,13 @@ func main() {
 		canvas.Size(400, 400),
 	)
 	w := NewWorld(5)
-	c.Main(func(dc *gg.Context) {
+
+	c.Setup(func(dc *canvas.Context) {
+		dc.SetRGB(0, 0, 1)
+		dc.Clear()
+	})
+
+	c.Draw(func(dc *canvas.Context) {
 		w.Draw(dc)
 		w.Update()
 	})
@@ -98,9 +103,7 @@ func (w *World) Update() {
 	}
 }
 
-func (w *World) Draw(dc *gg.Context) {
-	dc.SetRGB(0, 0, 0)
-	dc.Clear()
+func (w *World) Draw(dc *canvas.Context) {
 	dc.SetRGB(0, 1, 0)
 	for i := range w.Boids {
 		b := w.Boids[i]
