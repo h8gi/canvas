@@ -176,7 +176,6 @@ func (c *Canvas) startLoop() {
 			}
 
 			if publish {
-
 				w.Scale(sz.Bounds(), tex, tex.Bounds(), draw.Src, nil)
 				w.Publish()
 			}

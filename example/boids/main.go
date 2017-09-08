@@ -6,8 +6,6 @@ import (
 	"math"
 	"math/rand"
 
-	"golang.org/x/mobile/event/mouse"
-
 	"github.com/h8gi/canvas"
 )
 
@@ -15,7 +13,7 @@ func main() {
 	c := canvas.New(&canvas.NewCanvasOptions{
 		Width:     400,
 		Height:    400,
-		FrameRate: 20,
+		FrameRate: 2,
 		Title:     "hello",
 	})
 
@@ -27,16 +25,21 @@ func main() {
 	})
 
 	c.StartLoop(func(ctx *canvas.Context) {
+		// ctx.SetRGBA(1, 0, 0, 0)
+		// ctx.Clear()
+
 		w.Draw(ctx)
 		w.Update()
-		if ctx.MouseEvent().Direction == mouse.DirPress {
-			ctx.DrawLine(
-				float64(ctx.PreviousMouseEvent().X), float64(ctx.PreviousMouseEvent().Y),
-				float64(ctx.MouseEvent().X), float64(ctx.MouseEvent().Y),
-			)
-		}
+
+		ctx.SetLineWidth(4)
+		ctx.DrawLine(
+			float64(ctx.PreviousMouseEvent().X), float64(ctx.PreviousMouseEvent().Y),
+			float64(ctx.MouseEvent().X), float64(ctx.MouseEvent().Y),
+		)
+		ctx.Stroke()
+
 		fmt.Println(ctx.MouseEvent().X, ctx.MouseEvent().Y)
-		ctx.Fill()
+
 	})
 }
 
