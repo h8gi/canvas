@@ -156,12 +156,12 @@ func (c *Canvas) startLoop() {
 
 				if e.Direction == mouse.DirPress {
 					c.context.mu.Lock()
-					c.context.pressed = true
+					c.context.dragged = true
 					c.context.mu.Unlock()
 				}
 				if e.Direction == mouse.DirRelease {
 					c.context.mu.Lock()
-					c.context.pressed = false
+					c.context.dragged = false
 					c.context.mu.Unlock()
 				}
 			case paint.Event:

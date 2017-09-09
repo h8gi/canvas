@@ -11,7 +11,7 @@ func main() {
 		ctx.SetColor(colornames.Green)
 	})
 	c.Draw(func(ctx *canvas.Context) {
-		if ctx.MousePressed() {
+		if ctx.MouseDragged() {
 			ctx.DrawCircle(ctx.MouseX(), ctx.MouseY(), 5)
 			ctx.Fill()
 		}
