@@ -76,7 +76,7 @@ func (c *Canvas) Setup(initializer func(*Context)) {
 }
 
 // start main loop
-func (c *Canvas) StartLoop(drawer func(*Context)) {
+func (c *Canvas) Draw(drawer func(*Context)) {
 	c.drawFunc = func() {
 		c.context.mu.Lock()
 		drawer(c.context)
@@ -153,6 +153,17 @@ func (c *Canvas) startLoop() {
 				// rescaling mouse coord
 				m.Y = float32(c.height) * (m.Y / float32(sz.HeightPx))
 				m.X = float32(c.width) * (m.X / float32(sz.WidthPx))
+
+				if e.Direction == mouse.DirPress {
+					c.context.mu.Lock()
+					c.context.pressed = true
+					c.context.mu.Unlock()
+				}
+				if e.Direction == mouse.DirRelease {
+					c.context.mu.Lock()
+					c.context.pressed = false
+					c.context.mu.Unlock()
+				}
 			case paint.Event:
 				publish = true
 

@@ -2,7 +2,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 
@@ -13,33 +12,30 @@ func main() {
 	c := canvas.New(&canvas.NewCanvasOptions{
 		Width:     400,
 		Height:    400,
-		FrameRate: 2,
+		FrameRate: 30,
 		Title:     "hello",
 	})
 
 	w := NewWorld(5)
-
 	c.Setup(func(ctx *canvas.Context) {
 		ctx.SetRGB(0, 0, 1)
 		ctx.Clear()
+		ctx.SetLineWidth(4)
 	})
 
-	c.StartLoop(func(ctx *canvas.Context) {
+	c.Draw(func(ctx *canvas.Context) {
 		// ctx.SetRGBA(1, 0, 0, 0)
 		// ctx.Clear()
 
 		w.Draw(ctx)
 		w.Update()
-
-		ctx.SetLineWidth(4)
-		ctx.DrawLine(
-			float64(ctx.PreviousMouseEvent().X), float64(ctx.PreviousMouseEvent().Y),
-			float64(ctx.MouseEvent().X), float64(ctx.MouseEvent().Y),
-		)
-		ctx.Stroke()
-
-		fmt.Println(ctx.MouseEvent().X, ctx.MouseEvent().Y)
-
+		if ctx.MousePressed() {
+			ctx.DrawLine(
+				ctx.PreviousMouseX(), ctx.PreviousMouseY(),
+				ctx.MouseX(), ctx.MouseY(),
+			)
+			ctx.Stroke()
+		}
 	})
 }
 

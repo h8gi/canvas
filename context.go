@@ -15,6 +15,7 @@ type Context struct {
 	mu sync.Mutex
 	// mouse coordinates are rescaled by window size.
 	mouseEvents [2]mouse.Event
+	pressed     bool
 }
 
 func NewContext(width, height int) *Context {
@@ -24,6 +25,7 @@ func NewContext(width, height int) *Context {
 		*gg.NewContext(width, height),
 		mu,
 		mouseEvents,
+		false,
 	}
 }
 
@@ -41,4 +43,24 @@ func (ctx *Context) PreviousMouseEvent() mouse.Event {
 
 func (ctx *Context) MouseEvent() mouse.Event {
 	return ctx.mouseEvents[1]
+}
+
+func (ctx *Context) MouseX() float64 {
+	return float64(ctx.MouseEvent().X)
+}
+
+func (ctx *Context) MouseY() float64 {
+	return float64(ctx.MouseEvent().Y)
+}
+
+func (ctx *Context) PreviousMouseX() float64 {
+	return float64(ctx.PreviousMouseEvent().X)
+}
+
+func (ctx *Context) PreviousMouseY() float64 {
+	return float64(ctx.PreviousMouseEvent().Y)
+}
+
+func (ctx *Context) MousePressed() bool {
+	return ctx.pressed
 }
