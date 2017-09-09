@@ -6,7 +6,12 @@ import (
 )
 
 func main() {
-	c := canvas.New(nil)
+	c := canvas.New(&canvas.NewCanvasOptions{
+		Width:     600,
+		Height:    400,
+		FrameRate: 30,
+		Title:     "hello canvas!",
+	})
 	c.Setup(func(ctx *canvas.Context) {
 		ctx.SetColor(colornames.Green)
 	})
