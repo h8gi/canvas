@@ -12,9 +12,13 @@ func main() {
 		FrameRate: 30,
 		Title:     "hello canvas!",
 	})
+
 	c.Setup(func(ctx *canvas.Context) {
+		ctx.SetColor(colornames.White)
+		ctx.Clear()
 		ctx.SetColor(colornames.Green)
 	})
+
 	c.Draw(func(ctx *canvas.Context) {
 		if ctx.MouseDragged() {
 			ctx.DrawCircle(ctx.MouseX(), ctx.MouseY(), 5)
