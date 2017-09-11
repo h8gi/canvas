@@ -132,6 +132,7 @@ func (c *Canvas) startLoop() {
 
 		var sz size.Event // window size
 		var m mouse.Event // latest mouse event
+		var k key.Event   // latest key event
 		// event loop
 		for {
 			publish := false
@@ -145,9 +146,7 @@ func (c *Canvas) startLoop() {
 				}
 
 			case key.Event:
-				if e.Code == key.CodeEscape {
-					return
-				}
+				k = e
 			case mouse.Event:
 				m = e
 				// rescaling mouse coord
@@ -168,15 +167,16 @@ func (c *Canvas) startLoop() {
 				publish = true
 
 			case tickEvent:
-				// push latest mouse event to context
+
 				c.context.mu.Lock()
+				// push latest mouse event to context
 				c.context.pushMouseEvent(m)
+				// copy image from shared memory
+				copy(b.RGBA().Pix, c.context.pix())
+				// set mouse event
+				c.context.keyEvent = k
 				c.context.mu.Unlock()
 
-				// copy image from shared memory
-				c.context.mu.Lock()
-				copy(b.RGBA().Pix, c.context.pix())
-				c.context.mu.Unlock()
 				// upload buffer to texture
 				tex.Upload(image.Point{}, b, b.Bounds())
 				publish = true
