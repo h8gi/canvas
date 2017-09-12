@@ -7,75 +7,82 @@ import (
 	"image/draw"
 	"log"
 	"math/rand"
-	"sync"
 	"time"
-
-	"github.com/fogleman/gg"
 
 	"golang.org/x/exp/shiny/driver"
 	"golang.org/x/exp/shiny/screen"
 	"golang.org/x/mobile/event/key"
 	"golang.org/x/mobile/event/lifecycle"
+	"golang.org/x/mobile/event/mouse"
 	"golang.org/x/mobile/event/paint"
 	"golang.org/x/mobile/event/size"
 )
 
 // timer event
-type TickEvent struct{}
+type tickEvent struct{}
 
 // drawing area
 type Canvas struct {
 	width     int
 	height    int
 	frameRate int
+	title     string
+	initFunc  func()
 	drawFunc  func()
-	shared    struct {
-		mu              sync.Mutex
-		uploadEventSent bool
-		dc              *gg.Context
-	}
+	context   *Context
 }
 
-// self-referential functions pattern
-// https://commandcenter.blogspot.jp/2014/01/self-referential-functions-and-design.html
-type option func(*Canvas)
-
-func (c *Canvas) Option(opts ...option) {
-	for _, opt := range opts {
-		opt(c)
-	}
+type NewCanvasOptions struct {
+	Width, Height, FrameRate int
+	Title                    string
 }
 
-func FrameRate(fps int) option {
-	return func(c *Canvas) {
-		c.frameRate = fps
-	}
-}
+func New(opts *NewCanvasOptions) *Canvas {
+	width, height, frameRate := 600, 400, 30
+	title := "canvas"
 
-// set window size
-func Size(width, height int) option {
-	return func(c *Canvas) {
-		c.width = width
-		c.height = height
+	if opts != nil {
+		if opts.Width > 0 {
+			width = opts.Width
+		}
+		if opts.Height > 0 {
+			height = opts.Height
+		}
+		if opts.FrameRate > 0 {
+			frameRate = opts.FrameRate
+		}
+		title = opts.Title
 	}
-}
 
-func New() *Canvas {
-	c := &Canvas{}
-	c.Option(
-		Size(600, 400),
-		FrameRate(60),
-	)
+	c := &Canvas{
+		width:     width,
+		height:    height,
+		frameRate: frameRate,
+		title:     title,
+	}
+	c.context = NewContext(width, height)
+	// set init drawer
+	c.Setup(func(*Context) {})
 	return c
 }
 
-// start main loop
-func (c *Canvas) Main(f func(*gg.Context)) {
-	c.drawFunc = func() {
-		c.shared.mu.Lock()
-		f(c.shared.dc)
-		c.shared.mu.Unlock()
+// initialize drawer
+func (c *Canvas) Setup(initializer func(*Context)) {
+	c.initFunc = func() {
+		c.context.mu.Lock()
+		initializer(c.context)
+		c.context.mu.Unlock()
 	}
+}
+
+// start main loop
+func (c *Canvas) Draw(drawer func(*Context)) {
+	c.drawFunc = func() {
+		c.context.mu.Lock()
+		drawer(c.context)
+		c.context.mu.Unlock()
+	}
+	c.initFunc()
 	c.startLoop()
 }
 
@@ -85,7 +92,7 @@ func (c *Canvas) simulate(q screen.EventDeque) {
 	for {
 		// memory lock
 		c.drawFunc()
-		q.Send(TickEvent{})
+		q.Send(tickEvent{})
 		time.Sleep(duration)
 	}
 }
@@ -99,7 +106,7 @@ func (c *Canvas) startLoop() {
 		w, err := s.NewWindow(&screen.NewWindowOptions{
 			Width:  c.width,
 			Height: c.height,
-			Title:  "Basic Shiny Example",
+			Title:  c.title,
 		})
 		if err != nil {
 			log.Fatal(err)
@@ -119,13 +126,13 @@ func (c *Canvas) startLoop() {
 		}
 		defer tex.Release()
 		tex.Fill(tex.Bounds(), color.White, draw.Src)
-		// initialize draw context
-		c.shared.dc = gg.NewContextForRGBA(b.RGBA())
 
 		// invoke timer event
 		go c.simulate(w)
 
 		var sz size.Event // window size
+		var m mouse.Event // latest mouse event
+		var k key.Event   // latest key event
 		// event loop
 		for {
 			publish := false
@@ -139,20 +146,40 @@ func (c *Canvas) startLoop() {
 				}
 
 			case key.Event:
-				if e.Code == key.CodeEscape {
-					return
+				k = e
+			case mouse.Event:
+				m = e
+				// rescaling mouse coord
+				m.Y = float32(c.height) * (m.Y / float32(sz.HeightPx))
+				m.X = float32(c.width) * (m.X / float32(sz.WidthPx))
+
+				if e.Direction == mouse.DirPress {
+					c.context.mu.Lock()
+					c.context.dragged = true
+					c.context.mu.Unlock()
+				}
+				if e.Direction == mouse.DirRelease {
+					c.context.mu.Lock()
+					c.context.dragged = false
+					c.context.mu.Unlock()
 				}
 			case paint.Event:
 				publish = true
 
-			case TickEvent:
-				c.shared.mu.Lock()
+			case tickEvent:
+
+				c.context.mu.Lock()
+				// push latest mouse event to context
+				c.context.pushMouseEvent(m)
 				// copy image from shared memory
-				copy(b.RGBA().Pix, c.shared.dc.Image().(*image.RGBA).Pix)
-				c.shared.mu.Unlock()
+				copy(b.RGBA().Pix, c.context.pix())
+				// set mouse event
+				c.context.keyEvent = k
+				c.context.mu.Unlock()
+
+				// upload buffer to texture
 				tex.Upload(image.Point{}, b, b.Bounds())
 				publish = true
-
 			case size.Event:
 				sz = e
 			case error:

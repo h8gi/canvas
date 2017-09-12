@@ -5,31 +5,28 @@ import (
 
 	"golang.org/x/image/colornames"
 
-	"github.com/fogleman/gg"
 	"github.com/h8gi/canvas"
 )
 
 func main() {
-	c := canvas.New()
-
-	c.Option(
-		canvas.FrameRate(60),
-		canvas.Size(200, 150),
-	)
-
 	world := NewWorld(200, 150)
 
-	// see https://github.com/fogleman/gg
-	c.Main(func(dc *gg.Context) {
+	c := canvas.New(&canvas.NewCanvasOptions{
+		Width:     200,
+		Height:    150,
+		FrameRate: 30,
+	})
+
+	c.Draw(func(ctx *canvas.Context) {
 		world.Update()
-		for y := 0; y < dc.Height(); y++ {
-			for x := 0; x < dc.Width(); x++ {
+		for y := 0; y < ctx.Height(); y++ {
+			for x := 0; x < ctx.Width(); x++ {
 				if world.IsAliveAt(x, y) {
-					dc.SetColor(colornames.White)
+					ctx.SetColor(colornames.White)
 				} else {
-					dc.SetColor(colornames.Black)
+					ctx.SetColor(colornames.Black)
 				}
-				dc.SetPixel(x, y)
+				ctx.SetPixel(x, y)
 			}
 		}
 	})

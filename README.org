@@ -1,3 +1,55 @@
 * Introduction
 
 =canvas= is 2d animation library.
+
+* Usage
+
+Create canvas object.
+#+BEGIN_SRC go
+  c := canvas.New(&canvas.NewCanvasOptions{
+	  Width: 300,
+	  Height: 300,
+  })
+#+END_SRC
+
+Set drawing function and start loop.
+#+BEGIN_SRC go
+  c.Draw(func(ctx *canvas.Context) {
+	  if ctx.MouseDragged() {
+		  ctx.DrawCircle(ctx.MouseX(), ctx.MouseY(), 5)
+		  ctx.Fill()
+	  }
+  })
+#+END_SRC
+
+Struct =*gg.Context= is embedded in =*canvas.Context=.
+See [[https://github.com/fogleman/gg][https://github.com/fogleman/gg]] about details.
+
+
+* Example
+#+BEGIN_SRC go
+  package main
+
+  import (
+	  "github.com/h8gi/canvas"
+	  "golang.org/x/image/colornames"
+  )
+
+  func main() {
+	  c := canvas.New(&canvas.NewCanvasOptions{
+		  Width: 600,
+		  Height: 400,
+		  FrameRate: 30,
+		  Title: "hello canvas!",
+	  })
+	  c.Setup(func(ctx *canvas.Context) {
+		  ctx.SetColor(colornames.Green)
+	  })
+	  c.Draw(func(ctx *canvas.Context) {
+		  if ctx.MouseDragged() {
+			  ctx.DrawCircle(ctx.MouseX(), ctx.MouseY(), 5)
+			  ctx.Fill()
+		  }
+	  })
+  }
+#+END_SRC
