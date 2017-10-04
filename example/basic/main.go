@@ -24,5 +24,10 @@ func main() {
 			ctx.DrawCircle(ctx.MouseX(), ctx.MouseY(), 5)
 			ctx.Fill()
 		}
+		if ctx.KeyPressed() {
+			ctx.SetColor(colornames.White)
+			ctx.Clear()
+			ctx.SetColor(colornames.Green)
+		}
 	})
 }

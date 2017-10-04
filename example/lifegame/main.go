@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 
 	"golang.org/x/image/colornames"
+	"golang.org/x/mobile/event/key"
 
 	"github.com/h8gi/canvas"
 )
@@ -16,9 +18,17 @@ func main() {
 		Height:    150,
 		FrameRate: 30,
 	})
-
+	stop := false
 	c.Draw(func(ctx *canvas.Context) {
-		world.Update()
+		fmt.Println(ctx.KeyEvent())
+		if ctx.KeyPressed() {
+			if ctx.KeyEvent().Code == key.CodeS {
+				stop = !stop
+			}
+		}
+		if !stop {
+			world.Update()
+		}
 		for y := 0; y < ctx.Height(); y++ {
 			for x := 0; x < ctx.Width(); x++ {
 				if world.IsAliveAt(x, y) {
