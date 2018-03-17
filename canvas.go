@@ -6,7 +6,6 @@ import (
 	"image/color"
 	"image/draw"
 	"log"
-	"math/rand"
 	"time"
 
 	"golang.org/x/exp/shiny/driver"
@@ -98,8 +97,6 @@ func (c *Canvas) simulate(q screen.EventDeque) {
 }
 
 func (c *Canvas) startLoop() {
-	rand.Seed(time.Now().UnixNano())
-
 	driver.Main(func(s screen.Screen) {
 		// create window
 		bufSize := image.Point{c.width, c.height}
