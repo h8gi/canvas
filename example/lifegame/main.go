@@ -20,7 +20,7 @@ func main() {
 	})
 	stop := false
 	c.Draw(func(ctx *canvas.Context) {
-		if ctx.KeyPressed() {
+		if ctx.IsKeyPressed() {
 			fmt.Println(ctx.KeyEvent())
 			if ctx.KeyCode() == key.CodeS {
 				stop = !stop
