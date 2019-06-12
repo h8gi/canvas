@@ -20,9 +20,9 @@ func main() {
 	})
 	stop := false
 	c.Draw(func(ctx *canvas.Context) {
-		fmt.Println(ctx.KeyEvent())
 		if ctx.KeyPressed() {
-			if ctx.KeyEvent().Code == key.CodeS {
+			fmt.Println(ctx.KeyEvent())
+			if ctx.KeyCode() == key.CodeS {
 				stop = !stop
 			}
 		}

@@ -76,3 +76,7 @@ func (ctx *Context) KeyPressed() bool {
 func (ctx *Context) KeyEvent() key.Event {
 	return ctx.keyEvent
 }
+
+func (ctx *Context) KeyCode() key.Code {
+	return ctx.keyEvent.Code
+}
