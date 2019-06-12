@@ -70,11 +70,18 @@ func (ctx *Context) IsMouseDragged() bool {
 }
 
 func (ctx *Context) IsKeyPressed() bool {
-	return ctx.keyEvent.Direction == key.DirPress
+	return ctx.keyEvent.Code != key.CodeUnknown &&
+		ctx.keyEvent.Direction == key.DirPress
 }
 
 func (ctx *Context) IsKeyDown() bool {
-	return ctx.keyEvent.Direction == key.DirPress || ctx.keyEvent.Direction == key.DirNone
+	return ctx.keyEvent.Code != key.CodeUnknown &&
+		(ctx.keyEvent.Direction == key.DirPress || ctx.keyEvent.Direction == key.DirNone)
+}
+
+func (ctx *Context) IsKeyReleased() bool {
+	return ctx.keyEvent.Code != key.CodeUnknown &&
+		ctx.keyEvent.Direction == key.DirRelease
 }
 
 func (ctx *Context) KeyEvent() key.Event {

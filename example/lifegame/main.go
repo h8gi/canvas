@@ -21,11 +21,20 @@ func main() {
 	stop := false
 	c.Draw(func(ctx *canvas.Context) {
 		if ctx.IsKeyPressed() {
-			fmt.Println(ctx.KeyEvent())
+			fmt.Println(ctx.KeyCode(), "is pressed.")
 			if ctx.KeyCode() == key.CodeS {
 				stop = !stop
 			}
 		}
+
+		if ctx.IsKeyDown() {
+			fmt.Println(ctx.KeyCode(), "is down.")
+		}
+
+		if ctx.IsKeyReleased() {
+			fmt.Println(ctx.KeyCode(), "is released.")
+		}
+
 		if !stop {
 			world.Update()
 		}
