@@ -65,14 +65,29 @@ func (ctx *Context) PreviousMouseY() float64 {
 	return float64(ctx.PreviousMouseEvent().Y)
 }
 
-func (ctx *Context) MouseDragged() bool {
+func (ctx *Context) IsMouseDragged() bool {
 	return ctx.dragged
 }
 
-func (ctx *Context) KeyPressed() bool {
-	return ctx.keyEvent.Direction == key.DirPress
+func (ctx *Context) IsKeyPressed() bool {
+	return ctx.keyEvent.Code != key.CodeUnknown &&
+		ctx.keyEvent.Direction == key.DirPress
+}
+
+func (ctx *Context) IsKeyDown() bool {
+	return ctx.keyEvent.Code != key.CodeUnknown &&
+		(ctx.keyEvent.Direction == key.DirPress || ctx.keyEvent.Direction == key.DirNone)
+}
+
+func (ctx *Context) IsKeyReleased() bool {
+	return ctx.keyEvent.Code != key.CodeUnknown &&
+		ctx.keyEvent.Direction == key.DirRelease
 }
 
 func (ctx *Context) KeyEvent() key.Event {
 	return ctx.keyEvent
+}
+
+func (ctx *Context) KeyCode() key.Code {
+	return ctx.keyEvent.Code
 }

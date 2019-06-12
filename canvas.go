@@ -170,8 +170,10 @@ func (c *Canvas) startLoop() {
 				c.context.pushMouseEvent(m)
 				// copy image from shared memory
 				copy(b.RGBA().Pix, c.context.pix())
-				// set mouse event
+				// set key event
 				c.context.keyEvent = k
+				// clear key event
+				k = key.Event{}
 				c.context.mu.Unlock()
 
 				// upload buffer to texture

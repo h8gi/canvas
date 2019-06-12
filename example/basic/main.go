@@ -21,13 +21,13 @@ func main() {
 	})
 
 	c.Draw(func(ctx *canvas.Context) {
-		if ctx.MouseDragged() {
+		if ctx.IsMouseDragged() {
 			ctx.DrawLine(ctx.MouseX(), ctx.MouseY(),
 				ctx.PreviousMouseX(), ctx.PreviousMouseY())
 			ctx.Stroke()
 		}
 
-		if ctx.KeyPressed() {
+		if ctx.IsKeyPressed() {
 			ctx.Push()
 			ctx.SetColor(colornames.White)
 			ctx.Clear()
