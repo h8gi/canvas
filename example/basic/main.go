@@ -28,14 +28,10 @@ func main() {
 		}
 
 		if ctx.KeyPressed() {
+			ctx.Push()
 			ctx.SetColor(colornames.White)
 			ctx.Clear()
-			ctx.SetColor(colornames.Green)
-		}
-		if ctx.KeyPressed() {
-			ctx.SetColor(colornames.White)
-			ctx.Clear()
-			ctx.SetColor(colornames.Green)
+			ctx.Pop()
 		}
 	})
 }
