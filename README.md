@@ -5,7 +5,8 @@
 ## Usage
 
 Create canvas object.
-```{go}
+
+```go
 c := canvas.NewCanvas(&canvas.CanvasConfig{
 	Width: 300,
 	Height: 300,
@@ -14,7 +15,8 @@ c := canvas.NewCanvas(&canvas.CanvasConfig{
 ```
 
 Set drawing function and start loop.
-```{go}
+
+```go
 c.Draw(func(ctx *canvas.Context) {
 	if ctx.IsMouseDragged {
 		ctx.DrawCircle(ctx.Mouse.X, ctx.Mouse.Y, 5)
@@ -30,7 +32,7 @@ See [https://github.com/fogleman/gg](https://github.com/fogleman/gg) about detai
 
 See `example` directory.
 
-```{go}
+```go
 package main
 
 import (
