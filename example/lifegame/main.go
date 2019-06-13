@@ -1,51 +1,48 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 
 	"golang.org/x/image/colornames"
-	"golang.org/x/mobile/event/key"
 
+	"github.com/faiface/pixel/pixelgl"
 	"github.com/h8gi/canvas"
 )
 
 func main() {
 	world := NewWorld(200, 150)
 
-	c := canvas.New(&canvas.NewCanvasOptions{
-		Width:     200,
-		Height:    150,
+	c := canvas.NewCanvas(&canvas.CanvasConfig{
+		Width:     600,
+		Height:    400,
 		FrameRate: 30,
+		Title:     "Life Game",
 	})
+
 	stop := false
 	c.Draw(func(ctx *canvas.Context) {
-		if ctx.IsKeyPressed() {
-			fmt.Println(ctx.KeyCode(), "is pressed.")
-			if ctx.KeyCode() == key.CodeS {
-				stop = !stop
-			}
-		}
+		cellWidth := float64(ctx.Width()) / float64(world.width)
+		cellHeight := float64(ctx.Height()) / float64(world.height)
 
-		if ctx.IsKeyDown() {
-			fmt.Println(ctx.KeyCode(), "is down.")
-		}
-
-		if ctx.IsKeyReleased() {
-			fmt.Println(ctx.KeyCode(), "is released.")
+		if ctx.IsKeyPressed(pixelgl.KeyS) {
+			stop = !stop
 		}
 
 		if !stop {
 			world.Update()
 		}
-		for y := 0; y < ctx.Height(); y++ {
-			for x := 0; x < ctx.Width(); x++ {
+
+		for y := 0; y < world.height; y++ {
+			for x := 0; x < world.width; x++ {
 				if world.IsAliveAt(x, y) {
 					ctx.SetColor(colornames.White)
 				} else {
 					ctx.SetColor(colornames.Black)
 				}
-				ctx.SetPixel(x, y)
+				ctx.DrawRectangle(
+					cellWidth*float64(x), cellHeight*float64(y),
+					cellWidth, cellHeight)
+				ctx.Fill()
 			}
 		}
 	})
