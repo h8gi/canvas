@@ -36,7 +36,7 @@ See [https://github.com/fogleman/gg](https://github.com/fogleman/gg) about detai
 
 ## Example
 
-See `example` directory.
+See [`example`](example) directory.
 
 ```go
 package main
