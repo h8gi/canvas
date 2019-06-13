@@ -3,6 +3,7 @@ module github.com/h8gi/canvas
 go 1.12
 
 require (
+	fyne.io/fyne v1.0.1
 	github.com/fogleman/gg v1.3.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	golang.org/x/exp v0.0.0-20190510132918-efd6b22b2522
