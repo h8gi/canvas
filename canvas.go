@@ -2,41 +2,27 @@
 package canvas
 
 import (
-	"image"
-	"image/color"
-	"image/draw"
-	"log"
-	"time"
-
-	"golang.org/x/exp/shiny/driver"
-	"golang.org/x/exp/shiny/screen"
-	"golang.org/x/mobile/event/key"
-	"golang.org/x/mobile/event/lifecycle"
-	"golang.org/x/mobile/event/mouse"
-	"golang.org/x/mobile/event/paint"
-	"golang.org/x/mobile/event/size"
+	"github.com/faiface/pixel"
+	"github.com/faiface/pixel/pixelgl"
 )
-
-// timer event
-type tickEvent struct{}
 
 // drawing area
 type Canvas struct {
-	width     int
-	height    int
-	frameRate int
+	Width     int
+	Height    int
+	FrameRate int
 	title     string
 	initFunc  func()
 	drawFunc  func()
 	context   *Context
 }
 
-type NewCanvasOptions struct {
+type CanvasConfig struct {
 	Width, Height, FrameRate int
 	Title                    string
 }
 
-func New(opts *NewCanvasOptions) *Canvas {
+func NewCanvas(opts *CanvasConfig) *Canvas {
 	width, height, frameRate := 600, 400, 30
 	title := "canvas"
 
@@ -54,9 +40,9 @@ func New(opts *NewCanvasOptions) *Canvas {
 	}
 
 	c := &Canvas{
-		width:     width,
-		height:    height,
-		frameRate: frameRate,
+		Width:     width,
+		Height:    height,
+		FrameRate: frameRate,
 		title:     title,
 	}
 	c.context = NewContext(width, height)
@@ -82,123 +68,30 @@ func (c *Canvas) Draw(drawer func(*Context)) {
 		c.context.mu.Unlock()
 	}
 	c.initFunc()
-	c.startLoop()
-}
-
-// start inner loop
-func (c *Canvas) innerLoop(q screen.EventDeque) *time.Ticker {
-	duration := time.Second / time.Duration(c.frameRate)
-	t := time.NewTicker(duration)
-	go func() {
-		for {
-			select {
-			case <-t.C:
-				// memory lock
-				c.drawFunc()
-				q.Send(tickEvent{})
-			}
-		}
-	}()
-	return t
+	pixelgl.Run(c.startLoop)
 }
 
 func (c *Canvas) startLoop() {
-	driver.Main(func(s screen.Screen) {
-		// create window
-		bufSize := image.Point{c.width, c.height}
-		w, err := s.NewWindow(&screen.NewWindowOptions{
-			Width:  c.width,
-			Height: c.height,
-			Title:  c.title,
-		})
+	cfg := pixelgl.WindowConfig{
+		Title:  c.title,
+		Bounds: pixel.R(0, 0, float64(c.Width), float64(c.Height)),
+		VSync:  true,
+	}
+	win, err := pixelgl.NewWindow(cfg)
+	if err != nil {
+		panic(err)
+	}
+	c.context.pressed = win.Pressed
+	wincan := win.Canvas()
+	wincan.SetPixels(c.context.pix())
+	win.Update()
 
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer w.Release()
-
-		// create image buffer
-		b, err := s.NewBuffer(bufSize)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer b.Release()
-
-		tex, err := s.NewTexture(bufSize)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer tex.Release()
-		tex.Fill(tex.Bounds(), color.White, draw.Src)
-
-		// invoke timer event
-		t := c.innerLoop(w)
-
-		var sz size.Event // window size
-		var m mouse.Event // latest mouse event
-		var k key.Event   // latest key event
-		// event loop
-		for {
-			publish := false
-
-			e := w.NextEvent()
-			// handle event
-			switch e := e.(type) {
-			case lifecycle.Event: // close button. BUG: doesn't exit from program.
-				if e.To == lifecycle.StageDead {
-					t.Stop()
-					return
-				}
-
-			case key.Event:
-				k = e
-			case mouse.Event:
-				m = e
-				// rescaling mouse coord
-				m.Y = float32(c.height) * (m.Y / float32(sz.HeightPx))
-				m.X = float32(c.width) * (m.X / float32(sz.WidthPx))
-
-				if e.Direction == mouse.DirPress {
-					c.context.mu.Lock()
-					c.context.dragged = true
-					c.context.mu.Unlock()
-				}
-				if e.Direction == mouse.DirRelease {
-					c.context.mu.Lock()
-					c.context.dragged = false
-					c.context.mu.Unlock()
-				}
-			case paint.Event:
-				publish = true
-
-			case tickEvent:
-
-				c.context.mu.Lock()
-				// push latest mouse event to context
-				c.context.pushMouseEvent(m)
-				// copy image from shared memory
-				copy(b.RGBA().Pix, c.context.pix())
-				// set key event
-				c.context.keyEvent = k
-				// clear key event
-				k = key.Event{}
-				c.context.mu.Unlock()
-
-				// upload buffer to texture
-				tex.Upload(image.Point{}, b, b.Bounds())
-				publish = true
-			case size.Event:
-				sz = e
-			case error:
-				log.Print(e)
-			default:
-				log.Print("Unknown: ", e)
-			}
-
-			if publish {
-				w.Scale(sz.Bounds(), tex, tex.Bounds(), draw.Src, nil)
-				w.Publish()
-			}
-		}
-	})
+	for !win.Closed() {
+		c.context.IsMouseDragged = win.Pressed(pixelgl.MouseButtonLeft)
+		c.context.PMouse = c.context.Mouse
+		c.context.Mouse = win.MousePosition()
+		c.drawFunc()
+		wincan.SetPixels(c.context.pix())
+		win.Update()
+	}
 }
