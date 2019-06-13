@@ -2,6 +2,8 @@
 package canvas
 
 import (
+	"time"
+
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 )
@@ -23,7 +25,7 @@ type CanvasConfig struct {
 }
 
 func NewCanvas(opts *CanvasConfig) *Canvas {
-	width, height, frameRate := 600, 400, 30
+	width, height, frameRate := 600, 400, 60
 	title := "canvas"
 
 	if opts != nil {
@@ -81,10 +83,12 @@ func (c *Canvas) startLoop() {
 	if err != nil {
 		panic(err)
 	}
-	c.context.pressed = win.Pressed
+	c.context.pressed = win.JustPressed
 	wincan := win.Canvas()
 	wincan.SetPixels(c.context.pix())
 	win.Update()
+
+	fps := time.Tick(time.Second / time.Duration(c.FrameRate))
 
 	for !win.Closed() {
 		c.context.IsMouseDragged = win.Pressed(pixelgl.MouseButtonLeft)
@@ -93,5 +97,6 @@ func (c *Canvas) startLoop() {
 		c.drawFunc()
 		wincan.SetPixels(c.context.pix())
 		win.Update()
+		<-fps
 	}
 }
