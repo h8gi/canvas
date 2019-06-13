@@ -85,15 +85,21 @@ func (c *Canvas) Draw(drawer func(*Context)) {
 	c.startLoop()
 }
 
-// start inner simulation loop
-func (c *Canvas) simulate(q screen.EventDeque) {
+// start inner loop
+func (c *Canvas) innerLoop(q screen.EventDeque) *time.Ticker {
 	duration := time.Second / time.Duration(c.frameRate)
-	for {
-		// memory lock
-		c.drawFunc()
-		q.Send(tickEvent{})
-		time.Sleep(duration)
-	}
+	t := time.NewTicker(duration)
+	go func() {
+		for {
+			select {
+			case <-t.C:
+				// memory lock
+				c.drawFunc()
+				q.Send(tickEvent{})
+			}
+		}
+	}()
+	return t
 }
 
 func (c *Canvas) startLoop() {
@@ -105,6 +111,7 @@ func (c *Canvas) startLoop() {
 			Height: c.height,
 			Title:  c.title,
 		})
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -125,7 +132,7 @@ func (c *Canvas) startLoop() {
 		tex.Fill(tex.Bounds(), color.White, draw.Src)
 
 		// invoke timer event
-		go c.simulate(w)
+		t := c.innerLoop(w)
 
 		var sz size.Event // window size
 		var m mouse.Event // latest mouse event
@@ -139,6 +146,7 @@ func (c *Canvas) startLoop() {
 			switch e := e.(type) {
 			case lifecycle.Event: // close button. BUG: doesn't exit from program.
 				if e.To == lifecycle.StageDead {
+					t.Stop()
 					return
 				}
 
@@ -183,6 +191,8 @@ func (c *Canvas) startLoop() {
 				sz = e
 			case error:
 				log.Print(e)
+			default:
+				log.Print("Unknown: ", e)
 			}
 
 			if publish {
