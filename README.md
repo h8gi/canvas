@@ -2,6 +2,12 @@
 
 `canvas` is 2d animation library.
 
+## Installatioin
+
+```sh
+go get -u github.com/h8gi/canvas
+```
+
 ## Usage
 
 Create canvas object.
