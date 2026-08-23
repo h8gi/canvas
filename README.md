@@ -65,6 +65,7 @@ Check the [examples](examples) directory for complete programs:
 
 - [`drawline`](examples/drawline): Interactive mouse drawing and key interactions.
 - [`lifegame`](examples/lifegame): Conway's Game of Life simulation.
+- [`noise-landscape`](examples/noise-landscape): Organic wave animation with Perlin noise.
 - [`rotate-objects`](examples/rotate-objects): Coordinate system rotation and object transformations.
 - [`text`](examples/text): Text rendering, time tracking, and frame rate display.
 

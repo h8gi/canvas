@@ -240,4 +240,53 @@ func TestContext_InputAndFrameState(t *testing.T) {
 	}
 }
 
+func TestContext_DefaultFont(t *testing.T) {
+	ctx := NewContext(100, 100)
+	// Should not panic when drawing text without explicitly setting a font face
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("drawing text with default font panicked: %v", r)
+		}
+	}()
+	ctx.SetColor(color.White)
+	ctx.DrawString("Hello", 10, 20)
+}
+
+func TestContext_StyleHelpers(t *testing.T) {
+	ctx := NewContext(50, 50)
+
+	// FillHex
+	ctx.FillHex("#ff0000")
+	ctx.DrawRectangle(0, 0, 50, 50)
+	ctx.Fill()
+	pix := ctx.pix()
+	if pix[0] != 255 || pix[1] != 0 || pix[2] != 0 {
+		t.Errorf("expected FillHex to set fill color to red, got [%d %d %d]", pix[0], pix[1], pix[2])
+	}
+
+	// StrokeRGB & FillRGB
+	ctx.FillRGB(0, 1, 0)
+	ctx.StrokeRGB(0, 0, 1)
+
+	// FillRGBA & StrokeRGBA
+	ctx.FillRGBA(1, 1, 0, 0.5)
+	ctx.StrokeRGBA(0, 1, 1, 0.8)
+
+	// NoFill & NoStroke (transparent)
+	ctx.NoFill()
+	ctx.NoStroke()
+}
+
+func TestContext_SaveFrame(t *testing.T) {
+	ctx := NewContext(10, 10)
+	ctx.BackgroundRGB(1, 0, 0)
+
+	tmpFile := t.TempDir() + "/test_frame.png"
+	err := ctx.SaveFrame(tmpFile)
+	if err != nil {
+		t.Fatalf("SaveFrame failed: %v", err)
+	}
+}
+
+
 
