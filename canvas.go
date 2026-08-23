@@ -78,6 +78,7 @@ func NewCanvas(opts *CanvasConfig) *Canvas {
 		resizable:  resizable,
 		fullscreen: fullscreen,
 		looping:    true,
+		redrawReq:  true,
 	}
 	c.context = NewContext(width, height)
 	// set init drawer

@@ -329,6 +329,23 @@ func TestCanvas_ConfigOptions(t *testing.T) {
 	}
 }
 
+func TestCanvas_NoLoop_FirstFrame(t *testing.T) {
+	c := NewCanvas(nil)
+	// Initially, redrawReq should be true so the first frame renders even if NoLoop() is called in Setup
+	c.Setup(func(ctx *Context) {
+		c.NoLoop()
+	})
+	c.initFunc()
+
+	if c.IsLooping() {
+		t.Error("expected looping to be false after NoLoop in Setup")
+	}
+	if !c.redrawReq {
+		t.Error("expected redrawReq to be true so the initial frame executes")
+	}
+}
+
+
 
 
 
