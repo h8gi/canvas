@@ -2,10 +2,10 @@
 
 `canvas` is 2d animation library.
 
-## Installatioin
+## Installation
 
 ```sh
-go get -u github.com/h8gi/canvas
+go get github.com/h8gi/canvas
 ```
 
 ## Usage
@@ -34,15 +34,15 @@ c.Draw(func(ctx *canvas.Context) {
 Struct `gg.Context` is embedded in `canvas.Context`.
 See [https://github.com/fogleman/gg](https://github.com/fogleman/gg) about details.
 
-## Example
+## Examples
 
-See [example](example) directory.
+See [examples](examples) directory.
 
 ```go
 package main
 
 import (
-	"github.com/faiface/pixel/pixelgl"
+	"github.com/gopxl/pixel/v2"
 	"github.com/h8gi/canvas"
 	"golang.org/x/image/colornames"
 )
@@ -72,7 +72,7 @@ func main() {
 		ctx.Stroke()
 		ctx.Pop()
 
-		if ctx.IsKeyPressed(pixelgl.KeyUp) {
+		if ctx.IsKeyPressed(pixel.KeyUp) {
 			ctx.Push()
 			ctx.SetColor(colornames.White)
 			ctx.Clear()
@@ -85,4 +85,5 @@ func main() {
 ## Built With
 
 - [gg](https://github.com/fogleman/gg) - 2D graphics library.
-- [pixel](https://github.com/faiface/pixel) - 2D game library.
+- [pixel](https://github.com/gopxl/pixel) - 2D game library.
+

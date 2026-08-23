@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/faiface/pixel/pixelgl"
+	"github.com/gopxl/pixel/v2"
 	"github.com/h8gi/canvas"
 	"golang.org/x/image/colornames"
 )
@@ -31,7 +31,7 @@ func main() {
 		ctx.Stroke()
 		ctx.Pop()
 
-		if ctx.IsKeyPressed(pixelgl.KeyUp) {
+		if ctx.IsKeyPressed(pixel.KeyUp) {
 			ctx.Push()
 			ctx.SetColor(colornames.White)
 			ctx.Clear()

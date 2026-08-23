@@ -97,7 +97,7 @@ flycheck_*.el
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 
 README.html

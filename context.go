@@ -5,9 +5,8 @@ import (
 	"image"
 	"sync"
 
-	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
 	"github.com/fogleman/gg"
+	"github.com/gopxl/pixel/v2"
 )
 
 type Context struct {
@@ -16,7 +15,7 @@ type Context struct {
 	IsMouseDragged bool
 	Mouse          pixel.Vec
 	PMouse         pixel.Vec
-	pressed        func(pixelgl.Button) bool
+	pressed        func(pixel.Button) bool
 }
 
 func NewContext(width, height int) *Context {
@@ -25,9 +24,9 @@ func NewContext(width, height int) *Context {
 		*gg.NewContext(width, height),
 		mu,
 		false,
-		pixel.Vec{0, 0},
-		pixel.Vec{0, 0},
-		func(pixelgl.Button) bool { return true },
+		pixel.Vec{X: 0, Y: 0},
+		pixel.Vec{X: 0, Y: 0},
+		func(pixel.Button) bool { return true },
 	}
 }
 
@@ -35,6 +34,7 @@ func (ctx *Context) pix() []uint8 {
 	return ctx.Image().(*image.RGBA).Pix
 }
 
-func (ctx *Context) IsKeyPressed(b pixelgl.Button) bool {
+func (ctx *Context) IsKeyPressed(b pixel.Button) bool {
 	return ctx.pressed(b)
 }
+

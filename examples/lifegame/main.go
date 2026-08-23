@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/image/colornames"
 
-	"github.com/faiface/pixel/pixelgl"
+	"github.com/gopxl/pixel/v2"
 	"github.com/h8gi/canvas"
 )
 
@@ -24,7 +24,7 @@ func main() {
 		cellWidth := float64(ctx.Width()) / float64(world.width)
 		cellHeight := float64(ctx.Height()) / float64(world.height)
 
-		if ctx.IsKeyPressed(pixelgl.KeyS) {
+		if ctx.IsKeyPressed(pixel.KeyS) {
 			stop = !stop
 		}
 

@@ -4,8 +4,8 @@ package canvas
 import (
 	"time"
 
-	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
+	"github.com/gopxl/pixel/v2"
+	"github.com/gopxl/pixel/v2/backends/opengl"
 )
 
 // drawing area
@@ -70,16 +70,16 @@ func (c *Canvas) Draw(drawer func(*Context)) {
 		c.context.mu.Unlock()
 	}
 	c.initFunc()
-	pixelgl.Run(c.startLoop)
+	opengl.Run(c.startLoop)
 }
 
 func (c *Canvas) startLoop() {
-	cfg := pixelgl.WindowConfig{
+	cfg := opengl.WindowConfig{
 		Title:  c.title,
 		Bounds: pixel.R(0, 0, float64(c.Width), float64(c.Height)),
 		VSync:  true,
 	}
-	win, err := pixelgl.NewWindow(cfg)
+	win, err := opengl.NewWindow(cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -88,15 +88,17 @@ func (c *Canvas) startLoop() {
 	wincan.SetPixels(c.context.pix())
 	win.Update()
 
-	fps := time.Tick(time.Second / time.Duration(c.FrameRate))
+	ticker := time.NewTicker(time.Second / time.Duration(c.FrameRate))
+	defer ticker.Stop()
 
 	for !win.Closed() {
-		c.context.IsMouseDragged = win.Pressed(pixelgl.MouseButtonLeft)
+		c.context.IsMouseDragged = win.Pressed(pixel.MouseButtonLeft)
 		c.context.PMouse = c.context.Mouse
 		c.context.Mouse = win.MousePosition()
 		c.drawFunc()
 		wincan.SetPixels(c.context.pix())
 		win.Update()
-		<-fps
+		<-ticker.C
 	}
 }
+
