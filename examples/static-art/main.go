@@ -17,29 +17,67 @@ func main() {
 	})
 
 	c.Setup(func(ctx *canvas.Context) {
-		// Stop continuous frame rendering after the first frame
+		// Stop continuous frame rendering (renders once on launch)
 		c.NoLoop()
 	})
 
 	c.Draw(func(ctx *canvas.Context) {
-		ctx.BackgroundHex("#181825")
+		ctx.BackgroundHex("#0f172a")
 
-		// Draw generative geometric circles
-		for i := 0; i < 40; i++ {
-			x := canvas.Random(50, float64(ctx.Width())-50)
-			y := canvas.Random(50, float64(ctx.Height())-50)
-			radius := canvas.Random(10, 60)
+		// Palette
+		palette := []string{"#38bdf8", "#818cf8", "#c084fc", "#f472b6", "#fb7185", "#34d399"}
 
-			ctx.FillRGBA(rand.Float64(), rand.Float64(), rand.Float64(), 0.6)
-			ctx.StrokeHex("#cdd6f4")
-			ctx.SetLineWidth(1.5)
-			ctx.DrawCircle(x, y, radius)
-			ctx.Fill()
-			ctx.Stroke()
+		// Seed for deterministic art rendering
+		rand.Seed(12345)
+
+		// Draw generative geometric grid pattern
+		cols, rows := 8, 5
+		cellW := float64(ctx.Width()) / float64(cols)
+		cellH := (float64(ctx.Height()) - 50) / float64(rows)
+
+		for r := 0; r < rows; r++ {
+			for col := 0; col < cols; col++ {
+				cx := float64(col)*cellW + cellW/2
+				cy := float64(r)*cellH + cellH/2 + 10
+
+				ctx.Push()
+				ctx.Translate(cx, cy)
+				ctx.Rotate(canvas.Radians(float64(rand.Intn(4) * 45)))
+
+				colorHex := palette[rand.Intn(len(palette))]
+				ctx.FillHex(colorHex)
+				ctx.StrokeHex("#ffffff")
+				ctx.SetLineWidth(1.2)
+
+				shapeType := rand.Intn(3)
+				size := cellW * 0.35
+				switch shapeType {
+				case 0:
+					ctx.DrawCircle(0, 0, size)
+					ctx.Fill()
+					ctx.Stroke()
+				case 1:
+					ctx.DrawRectangle(-size, -size, size*2, size*2)
+					ctx.Fill()
+					ctx.Stroke()
+				case 2:
+					ctx.DrawRegularPolygon(6, 0, 0, size, 0)
+					ctx.Fill()
+					ctx.Stroke()
+				}
+
+				// Inner detail
+				ctx.FillHex("#0f172a")
+				ctx.DrawCircle(0, 0, size*0.4)
+				ctx.Fill()
+
+				ctx.Pop()
+			}
 		}
 
-		// Instructions
+		// Title / Info
 		ctx.FillColor(colornames.White)
-		ctx.DrawStringAnchored("Generative Static Art (Rendered once with NoLoop)", float64(ctx.Width())/2, 370, 0.5, 0.5)
+		ctx.DrawStringAnchored("Generative Geometric Grid (Rendered once with NoLoop)", float64(ctx.Width())/2, 380, 0.5, 0.5)
 	})
 }
+
