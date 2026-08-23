@@ -75,3 +75,8 @@ Check the [examples](examples) directory for complete programs:
 - [gg](https://github.com/fogleman/gg) - 2D graphics library
 - [pixel](https://github.com/gopxl/pixel) - 2D OpenGL game engine
 
+## License
+
+[MIT License](LICENSE) © 2019-2026 Hiroki Yagi (h8gi)
+
+
