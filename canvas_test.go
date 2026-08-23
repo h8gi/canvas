@@ -277,6 +277,23 @@ func TestContext_StyleHelpers(t *testing.T) {
 	ctx.NoStroke()
 }
 
+func TestContext_PixelAccess(t *testing.T) {
+	ctx := NewContext(20, 20)
+	ctx.BackgroundRGB(0, 0, 0)
+
+	ctx.SetPixelColor(5, 5, color.RGBA{R: 255, G: 128, B: 64, A: 255})
+	c := ctx.GetPixel(5, 5)
+	if c.R != 255 || c.G != 128 || c.B != 64 || c.A != 255 {
+		t.Errorf("GetPixel(5,5) expected [255 128 64 255], got %+v", c)
+	}
+
+	// Out of bounds should return transparent color
+	cOut := ctx.GetPixel(-1, 100)
+	if cOut.A != 0 {
+		t.Errorf("GetPixel out of bounds expected A=0, got %+v", cOut)
+	}
+}
+
 func TestContext_SaveFrame(t *testing.T) {
 	ctx := NewContext(10, 10)
 	ctx.BackgroundRGB(1, 0, 0)

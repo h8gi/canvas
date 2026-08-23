@@ -186,6 +186,36 @@ func (ctx *Context) SaveFrame(path string) error {
 	return ctx.SavePNG(path)
 }
 
+// GetPixel returns the color of the pixel at (x, y) in canvas coordinates.
+// If (x, y) is out of bounds, a transparent color is returned.
+func (ctx *Context) GetPixel(x, y int) color.RGBA {
+	if x < 0 || x >= ctx.Width() || y < 0 || y >= ctx.Height() {
+		return color.RGBA{R: 0, G: 0, B: 0, A: 0}
+	}
+	pix := ctx.pix()
+	idx := (y*ctx.Width() + x) * 4
+	return color.RGBA{
+		R: pix[idx],
+		G: pix[idx+1],
+		B: pix[idx+2],
+		A: pix[idx+3],
+	}
+}
+
+// SetPixelColor sets the color of the pixel at (x, y) in canvas coordinates.
+func (ctx *Context) SetPixelColor(x, y int, c color.Color) {
+	if x < 0 || x >= ctx.Width() || y < 0 || y >= ctx.Height() {
+		return
+	}
+	r, g, b, a := c.RGBA()
+	pix := ctx.pix()
+	idx := (y*ctx.Width() + x) * 4
+	pix[idx] = uint8(r >> 8)
+	pix[idx+1] = uint8(g >> 8)
+	pix[idx+2] = uint8(b >> 8)
+	pix[idx+3] = uint8(a >> 8)
+}
+
 // IsKeyPressed returns true if the key was just pressed in the current frame.
 func (ctx *Context) IsKeyPressed(k Key) bool {
 	return ctx.justPressed(k)
