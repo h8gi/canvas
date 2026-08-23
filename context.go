@@ -100,6 +100,16 @@ func (ctx *Context) BackgroundHex(hex string) {
 	ctx.Pop()
 }
 
+// BackgroundHSB clears the canvas with an HSB color (h: 0-360, s: 0-1, b: 0-1).
+func (ctx *Context) BackgroundHSB(h, s, b float64) {
+	ctx.Background(HSB(h, s, b))
+}
+
+// BackgroundHSBA clears the canvas with an HSBA color (h: 0-360, s: 0-1, b: 0-1, a: 0-1).
+func (ctx *Context) BackgroundHSBA(h, s, b, a float64) {
+	ctx.Background(HSBA(h, s, b, a))
+}
+
 // FillColor sets the current drawing color.
 func (ctx *Context) FillColor(c color.Color) {
 	ctx.SetColor(c)
@@ -138,6 +148,26 @@ func (ctx *Context) FillHex(hex string) {
 // StrokeHex sets the drawing color with a hexadecimal string (e.g., "#ff0000").
 func (ctx *Context) StrokeHex(hex string) {
 	ctx.SetHexColor(hex)
+}
+
+// FillHSB sets the drawing color using Hue (0-360), Saturation (0-1), and Brightness (0-1).
+func (ctx *Context) FillHSB(h, s, b float64) {
+	ctx.SetColor(HSB(h, s, b))
+}
+
+// FillHSBA sets the drawing color using Hue (0-360), Saturation (0-1), Brightness (0-1), and Alpha (0-1).
+func (ctx *Context) FillHSBA(h, s, b, a float64) {
+	ctx.SetColor(HSBA(h, s, b, a))
+}
+
+// StrokeHSB sets the drawing color using Hue (0-360), Saturation (0-1), and Brightness (0-1).
+func (ctx *Context) StrokeHSB(h, s, b float64) {
+	ctx.SetColor(HSB(h, s, b))
+}
+
+// StrokeHSBA sets the drawing color using Hue (0-360), Saturation (0-1), Brightness (0-1), and Alpha (0-1).
+func (ctx *Context) StrokeHSBA(h, s, b, a float64) {
+	ctx.SetColor(HSBA(h, s, b, a))
 }
 
 // NoFill sets the fill color to transparent.
