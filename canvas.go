@@ -20,15 +20,20 @@ type Canvas struct {
 	// FrameRate is the target frames per second.
 	FrameRate int
 
-	title      string
-	resizable  bool
-	fullscreen bool
-	looping    bool
-	redrawReq  bool
-	initFunc   func()
-	drawFunc   func()
-	context    *Context
-	mu         sync.Mutex
+	title             string
+	resizable         bool
+	fullscreen        bool
+	looping           bool
+	redrawReq         bool
+	initFunc          func()
+	drawFunc          func()
+	keyPressedFunc    func(*Context, Key)
+	keyReleasedFunc   func(*Context, Key)
+	mousePressedFunc  func(*Context, MouseButton)
+	mouseReleasedFunc func(*Context, MouseButton)
+	mouseMovedFunc    func(*Context, Vec)
+	context           *Context
+	mu                sync.Mutex
 }
 
 // CanvasConfig holds configuration parameters for creating a new Canvas.
@@ -114,6 +119,56 @@ func (c *Canvas) IsLooping() bool {
 	return c.looping
 }
 
+// KeyPressed registers a callback invoked when a keyboard key is pressed.
+func (c *Canvas) KeyPressed(fn func(*Context, Key)) {
+	c.keyPressedFunc = fn
+}
+
+// OnKeyPressed is an alias for KeyPressed.
+func (c *Canvas) OnKeyPressed(fn func(*Context, Key)) {
+	c.KeyPressed(fn)
+}
+
+// KeyReleased registers a callback invoked when a keyboard key is released.
+func (c *Canvas) KeyReleased(fn func(*Context, Key)) {
+	c.keyReleasedFunc = fn
+}
+
+// OnKeyReleased is an alias for KeyReleased.
+func (c *Canvas) OnKeyReleased(fn func(*Context, Key)) {
+	c.KeyReleased(fn)
+}
+
+// MousePressed registers a callback invoked when a mouse button is clicked.
+func (c *Canvas) MousePressed(fn func(*Context, MouseButton)) {
+	c.mousePressedFunc = fn
+}
+
+// OnMousePressed is an alias for MousePressed.
+func (c *Canvas) OnMousePressed(fn func(*Context, MouseButton)) {
+	c.MousePressed(fn)
+}
+
+// MouseReleased registers a callback invoked when a mouse button is released.
+func (c *Canvas) MouseReleased(fn func(*Context, MouseButton)) {
+	c.mouseReleasedFunc = fn
+}
+
+// OnMouseReleased is an alias for MouseReleased.
+func (c *Canvas) OnMouseReleased(fn func(*Context, MouseButton)) {
+	c.MouseReleased(fn)
+}
+
+// MouseMoved registers a callback invoked when the mouse cursor position changes.
+func (c *Canvas) MouseMoved(fn func(*Context, Vec)) {
+	c.mouseMovedFunc = fn
+}
+
+// OnMouseMoved is an alias for MouseMoved.
+func (c *Canvas) OnMouseMoved(fn func(*Context, Vec)) {
+	c.MouseMoved(fn)
+}
+
 // Setup registers an initialization function that runs once before the draw loop starts.
 func (c *Canvas) Setup(initializer func(*Context)) {
 	c.initFunc = func() {
@@ -173,6 +228,41 @@ func (c *Canvas) startLoop() {
 		c.context.IsMouseDragged = win.Pressed(pixel.MouseButtonLeft)
 		c.context.PMouse = c.context.Mouse
 		c.context.Mouse = toCanvasMousePos(win.MousePosition(), c.Height)
+
+		// Dispatch key events
+		if c.keyPressedFunc != nil {
+			for _, k := range allKeys {
+				if win.JustPressed(k) {
+					c.keyPressedFunc(c.context, k)
+				}
+			}
+		}
+		if c.keyReleasedFunc != nil {
+			for _, k := range allKeys {
+				if win.JustReleased(k) {
+					c.keyReleasedFunc(c.context, k)
+				}
+			}
+		}
+
+		// Dispatch mouse events
+		if c.mousePressedFunc != nil {
+			for _, btn := range allMouseButtons {
+				if win.JustPressed(btn) {
+					c.mousePressedFunc(c.context, btn)
+				}
+			}
+		}
+		if c.mouseReleasedFunc != nil {
+			for _, btn := range allMouseButtons {
+				if win.JustReleased(btn) {
+					c.mouseReleasedFunc(c.context, btn)
+				}
+			}
+		}
+		if c.mouseMovedFunc != nil && c.context.Mouse != c.context.PMouse {
+			c.mouseMovedFunc(c.context, c.context.Mouse)
+		}
 
 		c.mu.Lock()
 		shouldDraw := c.looping || c.redrawReq
