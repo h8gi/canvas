@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/gopxl/pixel/v2"
 	"github.com/h8gi/canvas"
 	"golang.org/x/image/colornames"
 )
@@ -15,8 +14,7 @@ func main() {
 	})
 
 	c.Setup(func(ctx *canvas.Context) {
-		ctx.SetColor(colornames.White)
-		ctx.Clear()
+		ctx.Background(colornames.White)
 		ctx.SetColor(colornames.Green)
 		ctx.SetLineWidth(5)
 	})
@@ -31,11 +29,8 @@ func main() {
 		ctx.Stroke()
 		ctx.Pop()
 
-		if ctx.IsKeyPressed(pixel.KeyUp) {
-			ctx.Push()
-			ctx.SetColor(colornames.White)
-			ctx.Clear()
-			ctx.Pop()
+		if ctx.IsKeyPressed(canvas.KeyUp) {
+			ctx.Background(colornames.White)
 		}
 	})
 }
