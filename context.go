@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/fogleman/gg"
+	"golang.org/x/image/font/basicfont"
 )
 
 type Context struct {
@@ -26,7 +27,7 @@ type Context struct {
 
 func NewContext(width, height int) *Context {
 	var mu sync.Mutex
-	return &Context{
+	ctx := &Context{
 		Context:          *gg.NewContext(width, height),
 		mu:               mu,
 		IsMouseDragged:   false,
@@ -37,6 +38,8 @@ func NewContext(width, height int) *Context {
 		justReleased:     func(Key) bool { return false },
 		flippedPixBuffer: make([]uint8, width*height*4),
 	}
+	ctx.SetFontFace(basicfont.Face7x13)
+	return ctx
 }
 
 func (ctx *Context) pix() []uint8 {
@@ -80,6 +83,61 @@ func (ctx *Context) BackgroundHex(hex string) {
 	ctx.Pop()
 }
 
+// FillColor sets the current drawing color.
+func (ctx *Context) FillColor(c color.Color) {
+	ctx.SetColor(c)
+}
+
+// StrokeColor sets the current drawing color.
+func (ctx *Context) StrokeColor(c color.Color) {
+	ctx.SetColor(c)
+}
+
+// FillRGB sets the drawing color with RGB values (0.0 to 1.0).
+func (ctx *Context) FillRGB(r, g, b float64) {
+	ctx.SetRGB(r, g, b)
+}
+
+// StrokeRGB sets the drawing color with RGB values (0.0 to 1.0).
+func (ctx *Context) StrokeRGB(r, g, b float64) {
+	ctx.SetRGB(r, g, b)
+}
+
+// FillRGBA sets the drawing color with RGBA values (0.0 to 1.0).
+func (ctx *Context) FillRGBA(r, g, b, a float64) {
+	ctx.SetRGBA(r, g, b, a)
+}
+
+// StrokeRGBA sets the drawing color with RGBA values (0.0 to 1.0).
+func (ctx *Context) StrokeRGBA(r, g, b, a float64) {
+	ctx.SetRGBA(r, g, b, a)
+}
+
+// FillHex sets the drawing color with a hexadecimal string (e.g., "#ff0000").
+func (ctx *Context) FillHex(hex string) {
+	ctx.SetHexColor(hex)
+}
+
+// StrokeHex sets the drawing color with a hexadecimal string (e.g., "#ff0000").
+func (ctx *Context) StrokeHex(hex string) {
+	ctx.SetHexColor(hex)
+}
+
+// NoFill sets the fill color to transparent.
+func (ctx *Context) NoFill() {
+	ctx.SetColor(color.Transparent)
+}
+
+// NoStroke sets the stroke color to transparent.
+func (ctx *Context) NoStroke() {
+	ctx.SetColor(color.Transparent)
+}
+
+// SaveFrame saves the current context buffer as a PNG image to the given path.
+func (ctx *Context) SaveFrame(path string) error {
+	return ctx.SavePNG(path)
+}
+
 // IsKeyPressed returns true if the key was just pressed in the current frame.
 func (ctx *Context) IsKeyPressed(k Key) bool {
 	return ctx.justPressed(k)
@@ -109,5 +167,6 @@ func (ctx *Context) IsMouseJustPressed(btn MouseButton) bool {
 func (ctx *Context) IsMouseJustReleased(btn MouseButton) bool {
 	return ctx.justReleased(btn)
 }
+
 
 
