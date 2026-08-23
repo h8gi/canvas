@@ -83,7 +83,10 @@ func (c *Canvas) startLoop() {
 	if err != nil {
 		panic(err)
 	}
-	c.context.pressed = win.JustPressed
+	c.context.justPressed = win.JustPressed
+	c.context.pressed = win.Pressed
+	c.context.justReleased = win.JustReleased
+
 	wincan := win.Canvas()
 	wincan.SetPixels(c.context.flippedPix())
 	win.Update()
@@ -91,7 +94,16 @@ func (c *Canvas) startLoop() {
 	ticker := time.NewTicker(time.Second / time.Duration(c.FrameRate))
 	defer ticker.Stop()
 
+	startTime := time.Now()
+	lastTime := startTime
+
 	for !win.Closed() {
+		now := time.Now()
+		c.context.DeltaTime = now.Sub(lastTime).Seconds()
+		c.context.Time = now.Sub(startTime).Seconds()
+		lastTime = now
+		c.context.FrameCount++
+
 		c.context.IsMouseDragged = win.Pressed(pixel.MouseButtonLeft)
 		c.context.PMouse = c.context.Mouse
 		c.context.Mouse = toCanvasMousePos(win.MousePosition(), c.Height)

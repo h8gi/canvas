@@ -87,8 +87,11 @@ func TestNewContext(t *testing.T) {
 	if ctx.PMouse.X != 0 || ctx.PMouse.Y != 0 {
 		t.Errorf("expected PMouse to be (0,0), got (%v,%v)", ctx.PMouse.X, ctx.PMouse.Y)
 	}
-	if !ctx.IsKeyPressed(pixel.KeySpace) {
-		t.Error("expected default pressed func to return true")
+	if ctx.IsKeyPressed(pixel.KeySpace) {
+		t.Error("expected default IsKeyPressed to return false")
+	}
+	if ctx.IsKeyDown(pixel.KeySpace) {
+		t.Error("expected default IsKeyDown to return false")
 	}
 
 	// Test pix()
@@ -183,4 +186,58 @@ func TestToCanvasMousePos(t *testing.T) {
 		t.Errorf("expected center to be (300, 200), got (%v, %v)", center.X, center.Y)
 	}
 }
+
+func TestContext_Background(t *testing.T) {
+	ctx := NewContext(10, 10)
+	ctx.BackgroundRGB(1, 0, 0)
+
+	pix := ctx.pix()
+	if pix[0] != 255 || pix[1] != 0 || pix[2] != 0 || pix[3] != 255 {
+		t.Errorf("expected BackgroundRGB to fill with red, got [%d %d %d %d]", pix[0], pix[1], pix[2], pix[3])
+	}
+
+	ctx.Background(color.RGBA{G: 255, A: 255})
+	pix = ctx.pix()
+	if pix[0] != 0 || pix[1] != 255 || pix[2] != 0 || pix[3] != 255 {
+		t.Errorf("expected Background to fill with green, got [%d %d %d %d]", pix[0], pix[1], pix[2], pix[3])
+	}
+
+	ctx.BackgroundHex("#0000ff")
+	pix = ctx.pix()
+	if pix[0] != 0 || pix[1] != 0 || pix[2] != 255 || pix[3] != 255 {
+		t.Errorf("expected BackgroundHex to fill with blue, got [%d %d %d %d]", pix[0], pix[1], pix[2], pix[3])
+	}
+}
+
+func TestContext_InputAndFrameState(t *testing.T) {
+	ctx := NewContext(10, 10)
+
+	ctx.justPressed = func(b Key) bool { return b == KeySpace }
+	ctx.pressed = func(b Key) bool { return b == KeyA || b == MouseLeft }
+	ctx.justReleased = func(b Key) bool { return b == KeyEscape }
+
+	if !ctx.IsKeyPressed(KeySpace) {
+		t.Error("expected KeySpace to be just pressed")
+	}
+	if ctx.IsKeyPressed(KeyA) {
+		t.Error("expected KeyA not to be just pressed")
+	}
+	if !ctx.IsKeyDown(KeyA) {
+		t.Error("expected KeyA to be down")
+	}
+	if !ctx.IsKeyJustReleased(KeyEscape) {
+		t.Error("expected KeyEscape to be just released")
+	}
+
+	if !ctx.IsMousePressed(MouseLeft) {
+		t.Error("expected MouseLeft to be pressed")
+	}
+	if ctx.IsMouseJustPressed(MouseLeft) {
+		t.Error("expected MouseLeft not to be just pressed")
+	}
+	if ctx.IsMouseJustReleased(MouseLeft) {
+		t.Error("expected MouseLeft not to be just released")
+	}
+}
+
 
