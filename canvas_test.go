@@ -2,6 +2,7 @@ package canvas
 
 import (
 	"image/color"
+	"os"
 	"testing"
 
 	"github.com/gopxl/pixel/v2"
@@ -302,6 +303,24 @@ func TestContext_SaveFrame(t *testing.T) {
 	err := ctx.SaveFrame(tmpFile)
 	if err != nil {
 		t.Fatalf("SaveFrame failed: %v", err)
+	}
+}
+
+func TestContext_SaveFrameSeq(t *testing.T) {
+	ctx := NewContext(10, 10)
+	ctx.BackgroundRGB(0, 1, 0)
+	ctx.FrameCount = 5
+
+	tmpDir := t.TempDir()
+	pattern := tmpDir + "/output_dir/frame_%04d.png"
+	err := ctx.SaveFrameSeq(pattern)
+	if err != nil {
+		t.Fatalf("SaveFrameSeq failed: %v", err)
+	}
+
+	expectedFile := tmpDir + "/output_dir/frame_0005.png"
+	if _, err := os.Stat(expectedFile); os.IsNotExist(err) {
+		t.Errorf("expected sequence file %s to exist", expectedFile)
 	}
 }
 

@@ -2,8 +2,11 @@
 package canvas
 
 import (
+	"fmt"
 	"image"
 	"image/color"
+	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/fogleman/gg"
@@ -184,6 +187,20 @@ func (ctx *Context) NoStroke() {
 // SaveFrame saves the current context buffer as a PNG image to the given path.
 func (ctx *Context) SaveFrame(path string) error {
 	return ctx.SavePNG(path)
+}
+
+// SaveFrameSeq saves the current context buffer as a formatted sequence frame.
+// pattern should contain a printf integer format verb (e.g. "frames/frame_%04d.png").
+// Parent directories are automatically created if they do not exist.
+func (ctx *Context) SaveFrameSeq(pattern string) error {
+	filePath := fmt.Sprintf(pattern, ctx.FrameCount)
+	dir := filepath.Dir(filePath)
+	if dir != "" && dir != "." {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			return err
+		}
+	}
+	return ctx.SaveFrame(filePath)
 }
 
 // GetPixel returns the color of the pixel at (x, y) in canvas coordinates.
