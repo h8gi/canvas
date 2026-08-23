@@ -12,6 +12,7 @@ It combines the power and simplicity of [`fogleman/gg`](https://github.com/fogle
 - **Simple & Intuitive**: Start animating with familiar `Setup` and `Draw` callbacks—no window or loop boilerplate.
 - **Rich 2D Vector Drawing**: Full 2D vector graphics (shapes, paths, text, images, colors, and transformations) powered by [`gg`](https://github.com/fogleman/gg).
 - **Interactive**: Built-in mouse and keyboard handling for interactive sketches, simulations, and creative coding.
+- **Easy Recording & Export**: Built-in automated animated GIF recording (`RecordGIF`) and sequential PNG frame capture (`SaveFrameSeq`).
 
 ## Installation
 
@@ -71,6 +72,7 @@ Check the [examples](examples) directory for complete programs:
 
 - [`drawline`](examples/drawline): Interactive mouse drawing and key interactions.
 - [`flow-field`](examples/flow-field): Organic flow field particles using HSB color and Perlin noise.
+- [`gif-export`](examples/gif-export): Automated animated GIF recording and exporting.
 - [`lifegame`](examples/lifegame): Conway's Game of Life simulation.
 - [`noise-landscape`](examples/noise-landscape): Organic wave animation with Perlin noise.
 - [`rotate-objects`](examples/rotate-objects): Coordinate system rotation and object transformations.

@@ -203,6 +203,15 @@ func (ctx *Context) SaveFrameSeq(pattern string) error {
 	return ctx.SaveFrame(filePath)
 }
 
+// CloneImage returns a deep copy of the current context RGBA image.
+func (ctx *Context) CloneImage() *image.RGBA {
+	src := ctx.Image().(*image.RGBA)
+	bounds := src.Bounds()
+	dst := image.NewRGBA(bounds)
+	copy(dst.Pix, src.Pix)
+	return dst
+}
+
 // GetPixel returns the color of the pixel at (x, y) in canvas coordinates.
 // If (x, y) is out of bounds, a transparent color is returned.
 func (ctx *Context) GetPixel(x, y int) color.RGBA {

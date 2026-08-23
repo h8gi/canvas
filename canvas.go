@@ -33,6 +33,7 @@ type Canvas struct {
 	mouseReleasedFunc func(*Context, MouseButton)
 	mouseMovedFunc    func(*Context, Vec)
 	context           *Context
+	recorder          *gifRecorder
 	mu                sync.Mutex
 }
 
@@ -84,6 +85,7 @@ func NewCanvas(opts *CanvasConfig) *Canvas {
 		fullscreen: fullscreen,
 		looping:    true,
 		redrawReq:  true,
+		recorder:   newGIFRecorder(frameRate),
 	}
 	c.context = NewContext(width, height)
 	// set init drawer
@@ -117,6 +119,21 @@ func (c *Canvas) IsLooping() bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.looping
+}
+
+// RecordGIF starts recording the specified number of rendered frames into an animated GIF file at path.
+// If opts is nil, default recording options are used.
+func (c *Canvas) RecordGIF(path string, frames int, opts ...*GIFOptions) {
+	var opt *GIFOptions
+	if len(opts) > 0 && opts[0] != nil {
+		opt = opts[0]
+	}
+	c.recorder.start(path, frames, opt)
+}
+
+// IsRecordingGIF returns true if a GIF recording is currently in progress.
+func (c *Canvas) IsRecordingGIF() bool {
+	return c.recorder.isRecording()
 }
 
 // KeyPressed registers a callback invoked when a keyboard key is pressed.
@@ -273,6 +290,7 @@ func (c *Canvas) startLoop() {
 			c.context.FrameCount++
 			c.drawFunc()
 			wincan.SetPixels(c.context.flippedPix())
+			c.recorder.capture(c.context)
 		}
 
 		win.Update()
