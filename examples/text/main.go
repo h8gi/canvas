@@ -23,27 +23,35 @@ func main() {
 	c.Draw(func(ctx *canvas.Context) {
 		ctx.BackgroundHex("#1e1e2e")
 
-		// Draw header text
+		// Title
 		ctx.SetColor(colornames.White)
-		ctx.DrawStringAnchored("Hello Canvas! (Processing-like 2D Library)", float64(ctx.Width())/2, 50, 0.5, 0.5)
+		ctx.DrawStringAnchored("Hello, Canvas!", float64(ctx.Width())/2, 60, 0.5, 0.5)
 
-		// Draw frame and time info
-		info := fmt.Sprintf("Frame: %d | Time: %.2fs | FPS: %.1f", ctx.FrameCount, ctx.Time, 1.0/ctx.DeltaTime)
+		// Subtitle
+		ctx.SetColor(colornames.Gray)
+		ctx.DrawStringAnchored("A lightweight 2D animation library for Go", float64(ctx.Width())/2, 90, 0.5, 0.5)
+
+		// Real-time animation stats
+		info := fmt.Sprintf("Frame: %d   Time: %.1fs   FPS: %.0f", ctx.FrameCount, ctx.Time, 1.0/ctx.DeltaTime)
 		ctx.SetColor(colornames.Cyan)
-		ctx.DrawStringAnchored(info, float64(ctx.Width())/2, 90, 0.5, 0.5)
+		ctx.DrawStringAnchored(info, float64(ctx.Width())/2, 140, 0.5, 0.5)
 
-		// Draw mouse position and instructions
-		mouseInfo := fmt.Sprintf("Mouse: (%.0f, %.0f) [Origin: Top-Left]", ctx.Mouse.X, ctx.Mouse.Y)
+		// Interactive status
+		mouseInfo := fmt.Sprintf("Mouse: (%.0f, %.0f)", ctx.Mouse.X, ctx.Mouse.Y)
 		ctx.SetColor(colornames.Yellow)
-		ctx.DrawStringAnchored(mouseInfo, float64(ctx.Width())/2, 130, 0.5, 0.5)
+		ctx.DrawStringAnchored(mouseInfo, float64(ctx.Width())/2, 170, 0.5, 0.5)
 
-		// Interactive box following mouse
-		ctx.SetColor(colornames.Crimson)
-		ctx.DrawCircle(ctx.Mouse.X, ctx.Mouse.Y, 15)
+		// Interactive cursor
+		if ctx.IsMouseDragged {
+			ctx.SetColor(colornames.Crimson)
+		} else {
+			ctx.SetColor(colornames.Cornflowerblue)
+		}
+		ctx.DrawCircle(ctx.Mouse.X, ctx.Mouse.Y, 12)
 		ctx.Fill()
 
-		// Key instruction
-		ctx.SetColor(colornames.Lightgray)
-		ctx.DrawStringAnchored("Move mouse around. Text renders correctly from top to bottom.", float64(ctx.Width())/2, 350, 0.5, 0.5)
+		// Footer instruction
+		ctx.SetColor(colornames.Darkgray)
+		ctx.DrawStringAnchored("Click and drag to interact", float64(ctx.Width())/2, 360, 0.5, 0.5)
 	})
 }
