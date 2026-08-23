@@ -10,21 +10,38 @@ import (
 	"golang.org/x/image/font/basicfont"
 )
 
+// Context embeds gg.Context for 2D vector drawing and provides input states,
+// animation time metrics, and convenience helpers.
 type Context struct {
 	gg.Context
-	mu               sync.Mutex
-	IsMouseDragged   bool
-	Mouse            Vec
-	PMouse           Vec
-	FrameCount       int
-	DeltaTime        float64
-	Time             float64
+
+	mu sync.Mutex
+
+	// IsMouseDragged is true when the left mouse button is pressed and held.
+	IsMouseDragged bool
+
+	// Mouse holds the current mouse position in canvas coordinates (top-left is (0, 0)).
+	Mouse Vec
+
+	// PMouse holds the previous frame's mouse position in canvas coordinates.
+	PMouse Vec
+
+	// FrameCount is the total number of frames rendered since canvas startup.
+	FrameCount int
+
+	// DeltaTime is the elapsed time in seconds since the previous frame.
+	DeltaTime float64
+
+	// Time is the total elapsed time in seconds since canvas startup.
+	Time float64
+
 	justPressed      func(Key) bool
 	pressed          func(Key) bool
 	justReleased     func(Key) bool
 	flippedPixBuffer []uint8
 }
 
+// NewContext creates a new Context with the specified dimensions and sets the default basic font face.
 func NewContext(width, height int) *Context {
 	var mu sync.Mutex
 	ctx := &Context{
