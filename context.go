@@ -43,6 +43,8 @@ type Context struct {
 	justReleased     func(Key) bool
 	flippedPixBuffer []uint8
 	firstVertex      bool
+	rectMode         RectMode
+	ellipseMode      EllipseMode
 }
 
 // NewContext creates a new Context with the specified dimensions and sets the default basic font face.
