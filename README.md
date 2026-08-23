@@ -70,11 +70,14 @@ func main() {
 
 Check the [examples](examples) directory for complete programs:
 
+- [`boids`](examples/boids): Craig Reynolds' flocking simulation using 2D vector arithmetic.
 - [`drawline`](examples/drawline): Interactive mouse drawing and key interactions.
 - [`flow-field`](examples/flow-field): Organic flow field particles using HSB color and Perlin noise.
+- [`fractal-tree`](examples/fractal-tree): Organic recursive fractal tree with Perlin noise wind animation.
 - [`gif-export`](examples/gif-export): Automated animated GIF recording and exporting.
 - [`lifegame`](examples/lifegame): Conway's Game of Life simulation.
 - [`noise-landscape`](examples/noise-landscape): Organic wave animation with Perlin noise.
+- [`particle-system`](examples/particle-system): Physics-based particle fountain with easings and offscreen trail layer.
 - [`rotate-objects`](examples/rotate-objects): Coordinate system rotation and object transformations.
 - [`static-art`](examples/static-art): Single-frame generative art using `NoLoop()`.
 - [`text`](examples/text): Text rendering, time tracking, and frame rate display.
