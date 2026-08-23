@@ -29,6 +29,9 @@ type Context struct {
 	// PMouse holds the previous frame's mouse position in canvas coordinates.
 	PMouse Vec
 
+	// MouseScroll holds the mouse wheel / trackpad scroll offset for the current frame.
+	MouseScroll Vec
+
 	// FrameCount is the total number of frames rendered since canvas startup.
 	FrameCount int
 

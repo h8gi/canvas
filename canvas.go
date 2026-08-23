@@ -32,6 +32,8 @@ type Canvas struct {
 	mousePressedFunc  func(*Context, MouseButton)
 	mouseReleasedFunc func(*Context, MouseButton)
 	mouseMovedFunc    func(*Context, Vec)
+	mouseScrolledFunc func(*Context, Vec)
+	windowResizedFunc func(*Context, int, int)
 	context           *Context
 	recorder          *gifRecorder
 	mu                sync.Mutex
@@ -186,6 +188,26 @@ func (c *Canvas) OnMouseMoved(fn func(*Context, Vec)) {
 	c.MouseMoved(fn)
 }
 
+// MouseScrolled registers a callback invoked when mouse wheel or trackpad is scrolled.
+func (c *Canvas) MouseScrolled(fn func(*Context, Vec)) {
+	c.mouseScrolledFunc = fn
+}
+
+// OnMouseScrolled is an alias for MouseScrolled.
+func (c *Canvas) OnMouseScrolled(fn func(*Context, Vec)) {
+	c.MouseScrolled(fn)
+}
+
+// WindowResized registers a callback invoked when the canvas window is resized.
+func (c *Canvas) WindowResized(fn func(*Context, int, int)) {
+	c.windowResizedFunc = fn
+}
+
+// OnWindowResized is an alias for WindowResized.
+func (c *Canvas) OnWindowResized(fn func(*Context, int, int)) {
+	c.WindowResized(fn)
+}
+
 // Setup registers an initialization function that runs once before the draw loop starts.
 func (c *Canvas) Setup(initializer func(*Context)) {
 	c.initFunc = func() {
@@ -245,6 +267,7 @@ func (c *Canvas) startLoop() {
 		c.context.IsMouseDragged = win.Pressed(pixel.MouseButtonLeft)
 		c.context.PMouse = c.context.Mouse
 		c.context.Mouse = toCanvasMousePos(win.MousePosition(), c.Height)
+		c.context.MouseScroll = win.MouseScroll()
 
 		// Dispatch key events
 		if c.keyPressedFunc != nil {
@@ -279,6 +302,20 @@ func (c *Canvas) startLoop() {
 		}
 		if c.mouseMovedFunc != nil && c.context.Mouse != c.context.PMouse {
 			c.mouseMovedFunc(c.context, c.context.Mouse)
+		}
+		if c.mouseScrolledFunc != nil && c.context.MouseScroll != pixel.ZV {
+			c.mouseScrolledFunc(c.context, c.context.MouseScroll)
+		}
+
+		// Detect window resizing
+		bounds := win.Bounds()
+		bw, bh := int(bounds.W()), int(bounds.H())
+		if bw != c.Width || bh != c.Height {
+			c.Width = bw
+			c.Height = bh
+			if c.windowResizedFunc != nil {
+				c.windowResizedFunc(c.context, bw, bh)
+			}
 		}
 
 		c.mu.Lock()
