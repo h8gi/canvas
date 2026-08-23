@@ -2,6 +2,7 @@
 package canvas
 
 import (
+	"sync"
 	"time"
 
 	"github.com/gopxl/pixel/v2"
@@ -10,23 +11,32 @@ import (
 
 // drawing area
 type Canvas struct {
-	Width     int
-	Height    int
-	FrameRate int
-	title     string
-	initFunc  func()
-	drawFunc  func()
-	context   *Context
+	Width      int
+	Height     int
+	FrameRate  int
+	title      string
+	resizable  bool
+	fullscreen bool
+	looping    bool
+	redrawReq  bool
+	initFunc   func()
+	drawFunc   func()
+	context    *Context
+	mu         sync.Mutex
 }
 
 type CanvasConfig struct {
 	Width, Height, FrameRate int
 	Title                    string
+	Resizable                bool
+	Fullscreen               bool
 }
 
 func NewCanvas(opts *CanvasConfig) *Canvas {
 	width, height, frameRate := 600, 400, 60
 	title := "canvas"
+	resizable := false
+	fullscreen := false
 
 	if opts != nil {
 		if opts.Width > 0 {
@@ -39,18 +49,51 @@ func NewCanvas(opts *CanvasConfig) *Canvas {
 			frameRate = opts.FrameRate
 		}
 		title = opts.Title
+		resizable = opts.Resizable
+		fullscreen = opts.Fullscreen
 	}
 
 	c := &Canvas{
-		Width:     width,
-		Height:    height,
-		FrameRate: frameRate,
-		title:     title,
+		Width:      width,
+		Height:     height,
+		FrameRate:  frameRate,
+		title:      title,
+		resizable:  resizable,
+		fullscreen: fullscreen,
+		looping:    true,
 	}
 	c.context = NewContext(width, height)
 	// set init drawer
 	c.Setup(func(*Context) {})
 	return c
+}
+
+// NoLoop stops the continuous animation loop.
+func (c *Canvas) NoLoop() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.looping = false
+}
+
+// Loop resumes the continuous animation loop.
+func (c *Canvas) Loop() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.looping = true
+}
+
+// Redraw requests a single frame draw when the loop is paused.
+func (c *Canvas) Redraw() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.redrawReq = true
+}
+
+// IsLooping returns true if the animation loop is currently active.
+func (c *Canvas) IsLooping() bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.looping
 }
 
 // initialize drawer
@@ -75,10 +118,15 @@ func (c *Canvas) Draw(drawer func(*Context)) {
 
 func (c *Canvas) startLoop() {
 	cfg := opengl.WindowConfig{
-		Title:  c.title,
-		Bounds: pixel.R(0, 0, float64(c.Width), float64(c.Height)),
-		VSync:  true,
+		Title:     c.title,
+		Bounds:    pixel.R(0, 0, float64(c.Width), float64(c.Height)),
+		VSync:     true,
+		Resizable: c.resizable,
 	}
+	if c.fullscreen {
+		cfg.Monitor = opengl.PrimaryMonitor()
+	}
+
 	win, err := opengl.NewWindow(cfg)
 	if err != nil {
 		panic(err)
@@ -102,13 +150,22 @@ func (c *Canvas) startLoop() {
 		c.context.DeltaTime = now.Sub(lastTime).Seconds()
 		c.context.Time = now.Sub(startTime).Seconds()
 		lastTime = now
-		c.context.FrameCount++
 
 		c.context.IsMouseDragged = win.Pressed(pixel.MouseButtonLeft)
 		c.context.PMouse = c.context.Mouse
 		c.context.Mouse = toCanvasMousePos(win.MousePosition(), c.Height)
-		c.drawFunc()
-		wincan.SetPixels(c.context.flippedPix())
+
+		c.mu.Lock()
+		shouldDraw := c.looping || c.redrawReq
+		c.redrawReq = false
+		c.mu.Unlock()
+
+		if shouldDraw {
+			c.context.FrameCount++
+			c.drawFunc()
+			wincan.SetPixels(c.context.flippedPix())
+		}
+
 		win.Update()
 		<-ticker.C
 	}
