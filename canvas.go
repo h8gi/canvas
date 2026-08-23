@@ -1,4 +1,6 @@
-// simple animation library
+// Package canvas provides a lightweight, Processing-like 2D animation and creative coding library for Go.
+//
+// It integrates fogleman/gg for 2D vector drawing with gopxl/pixel for windowing and hardware rendering.
 package canvas
 
 import (
@@ -9,11 +11,15 @@ import (
 	"github.com/gopxl/pixel/v2/backends/opengl"
 )
 
-// drawing area
+// Canvas represents the drawing area and manages the animation loop and window lifecycle.
 type Canvas struct {
-	Width      int
-	Height     int
-	FrameRate  int
+	// Width is the width of the canvas window in pixels.
+	Width int
+	// Height is the height of the canvas window in pixels.
+	Height int
+	// FrameRate is the target frames per second.
+	FrameRate int
+
 	title      string
 	resizable  bool
 	fullscreen bool
@@ -25,13 +31,24 @@ type Canvas struct {
 	mu         sync.Mutex
 }
 
+// CanvasConfig holds configuration parameters for creating a new Canvas.
 type CanvasConfig struct {
-	Width, Height, FrameRate int
-	Title                    string
-	Resizable                bool
-	Fullscreen               bool
+	// Width is the window width in pixels (default: 600).
+	Width int
+	// Height is the window height in pixels (default: 400).
+	Height int
+	// FrameRate is the target FPS (default: 60).
+	FrameRate int
+	// Title is the window title bar text (default: "canvas").
+	Title string
+	// Resizable allows the window to be resized by the user.
+	Resizable bool
+	// Fullscreen opens the window in fullscreen on the primary monitor.
+	Fullscreen bool
 }
 
+// NewCanvas creates and initializes a new Canvas instance with the given configuration options.
+// If opts is nil, default options are applied.
 func NewCanvas(opts *CanvasConfig) *Canvas {
 	width, height, frameRate := 600, 400, 60
 	title := "canvas"
@@ -96,7 +113,7 @@ func (c *Canvas) IsLooping() bool {
 	return c.looping
 }
 
-// initialize drawer
+// Setup registers an initialization function that runs once before the draw loop starts.
 func (c *Canvas) Setup(initializer func(*Context)) {
 	c.initFunc = func() {
 		c.context.mu.Lock()
@@ -105,7 +122,8 @@ func (c *Canvas) Setup(initializer func(*Context)) {
 	}
 }
 
-// start main loop
+// Draw registers the main rendering callback and starts the window event loop.
+// Note: Draw must be called from the main thread / main function.
 func (c *Canvas) Draw(drawer func(*Context)) {
 	c.drawFunc = func() {
 		c.context.mu.Lock()
