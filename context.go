@@ -11,27 +11,34 @@ import (
 
 type Context struct {
 	gg.Context
-	mu             sync.Mutex
-	IsMouseDragged bool
-	Mouse          pixel.Vec
-	PMouse         pixel.Vec
-	pressed        func(pixel.Button) bool
+	mu               sync.Mutex
+	IsMouseDragged   bool
+	Mouse            pixel.Vec
+	PMouse           pixel.Vec
+	pressed          func(pixel.Button) bool
+	flippedPixBuffer []uint8
 }
 
 func NewContext(width, height int) *Context {
 	var mu sync.Mutex
 	return &Context{
-		*gg.NewContext(width, height),
-		mu,
-		false,
-		pixel.Vec{X: 0, Y: 0},
-		pixel.Vec{X: 0, Y: 0},
-		func(pixel.Button) bool { return true },
+		Context:          *gg.NewContext(width, height),
+		mu:               mu,
+		IsMouseDragged:   false,
+		Mouse:            pixel.Vec{X: 0, Y: 0},
+		PMouse:           pixel.Vec{X: 0, Y: 0},
+		pressed:          func(pixel.Button) bool { return true },
+		flippedPixBuffer: make([]uint8, width*height*4),
 	}
 }
 
 func (ctx *Context) pix() []uint8 {
 	return ctx.Image().(*image.RGBA).Pix
+}
+
+func (ctx *Context) flippedPix() []uint8 {
+	flipV(ctx.pix(), ctx.flippedPixBuffer, ctx.Width(), ctx.Height())
+	return ctx.flippedPixBuffer
 }
 
 func (ctx *Context) IsKeyPressed(b pixel.Button) bool {

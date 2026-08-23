@@ -85,7 +85,7 @@ func (c *Canvas) startLoop() {
 	}
 	c.context.pressed = win.JustPressed
 	wincan := win.Canvas()
-	wincan.SetPixels(c.context.pix())
+	wincan.SetPixels(c.context.flippedPix())
 	win.Update()
 
 	ticker := time.NewTicker(time.Second / time.Duration(c.FrameRate))
@@ -94,11 +94,24 @@ func (c *Canvas) startLoop() {
 	for !win.Closed() {
 		c.context.IsMouseDragged = win.Pressed(pixel.MouseButtonLeft)
 		c.context.PMouse = c.context.Mouse
-		c.context.Mouse = win.MousePosition()
+		c.context.Mouse = toCanvasMousePos(win.MousePosition(), c.Height)
 		c.drawFunc()
-		wincan.SetPixels(c.context.pix())
+		wincan.SetPixels(c.context.flippedPix())
 		win.Update()
 		<-ticker.C
 	}
+}
+
+func flipV(src, dst []uint8, width, height int) {
+	stride := width * 4
+	for y := 0; y < height; y++ {
+		srcRow := src[y*stride : (y+1)*stride]
+		dstRow := dst[(height-1-y)*stride : (height-y)*stride]
+		copy(dstRow, srcRow)
+	}
+}
+
+func toCanvasMousePos(pixelPos pixel.Vec, height int) pixel.Vec {
+	return pixel.V(pixelPos.X, float64(height)-pixelPos.Y)
 }
 

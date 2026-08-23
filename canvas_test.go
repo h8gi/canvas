@@ -110,3 +110,77 @@ func TestContext_Drawing(t *testing.T) {
 		t.Errorf("expected pixel to be red [255 0 0 255], got [%d %d %d %d]", pix[0], pix[1], pix[2], pix[3])
 	}
 }
+
+func TestFlipV(t *testing.T) {
+	// 2x2 image (4 pixels = 16 bytes)
+	// Row 0: Pixel 0: (1, 1, 1, 1), Pixel 1: (2, 2, 2, 2)
+	// Row 1: Pixel 2: (3, 3, 3, 3), Pixel 3: (4, 4, 4, 4)
+	src := []uint8{
+		1, 1, 1, 1, 2, 2, 2, 2,
+		3, 3, 3, 3, 4, 4, 4, 4,
+	}
+	dst := make([]uint8, len(src))
+	flipV(src, dst, 2, 2)
+
+	// After flip, Row 0 in dst should be Row 1 of src, and Row 1 in dst should be Row 0 of src
+	expected := []uint8{
+		3, 3, 3, 3, 4, 4, 4, 4,
+		1, 1, 1, 1, 2, 2, 2, 2,
+	}
+	for i, b := range dst {
+		if b != expected[i] {
+			t.Fatalf("at index %d: expected %d, got %d", i, expected[i], b)
+		}
+	}
+}
+
+func TestContext_FlippedPix(t *testing.T) {
+	// Draw a dot at top-left (0, 0)
+	ctx := NewContext(10, 10)
+	ctx.SetColor(color.Black)
+	ctx.Clear()
+	// Set (0,0) to Red
+	ctx.SetColor(color.RGBA{R: 255, G: 0, B: 0, A: 255})
+	ctx.SetPixel(0, 0)
+
+	// ctx.pix() (top-left origin) should have Red at pixel (0,0) which is index 0
+	pix := ctx.pix()
+	if pix[0] != 255 || pix[1] != 0 || pix[2] != 0 {
+		t.Fatalf("expected (0,0) in pix to be red, got [%d %d %d]", pix[0], pix[1], pix[2])
+	}
+
+	// In OpenGL texture space (bottom-left origin), the top-left pixel (0,0) in gg
+	// should end up at the top row in OpenGL, which is at the end of the flipped buffer:
+	// y = height - 1 = 9, x = 0 -> index = (9 * 10 + 0) * 4 = 360
+	flipped := ctx.flippedPix()
+	if flipped[360] != 255 || flipped[361] != 0 || flipped[362] != 0 {
+		t.Fatalf("expected top row in flippedPix to contain red at index 360, got [%d %d %d]", flipped[360], flipped[361], flipped[362])
+	}
+	// And bottom row in flippedPix (index 0) should be Black
+	if flipped[0] != 0 || flipped[1] != 0 || flipped[2] != 0 {
+		t.Fatalf("expected index 0 in flippedPix to be black, got [%d %d %d]", flipped[0], flipped[1], flipped[2])
+	}
+}
+
+func TestToCanvasMousePos(t *testing.T) {
+	height := 400
+
+	// OpenGL (0, 0) is bottom-left -> Processing canvas (0, height)
+	bottomLeft := toCanvasMousePos(pixel.V(0, 0), height)
+	if bottomLeft.X != 0 || bottomLeft.Y != 400 {
+		t.Errorf("expected bottom-left to be (0, 400), got (%v, %v)", bottomLeft.X, bottomLeft.Y)
+	}
+
+	// OpenGL (0, 400) is top-left -> Processing canvas (0, 0)
+	topLeft := toCanvasMousePos(pixel.V(0, 400), height)
+	if topLeft.X != 0 || topLeft.Y != 0 {
+		t.Errorf("expected top-left to be (0, 0), got (%v, %v)", topLeft.X, topLeft.Y)
+	}
+
+	// OpenGL center (300, 200) -> Processing canvas (300, 200)
+	center := toCanvasMousePos(pixel.V(300, 200), height)
+	if center.X != 300 || center.Y != 200 {
+		t.Errorf("expected center to be (300, 200), got (%v, %v)", center.X, center.Y)
+	}
+}
+
