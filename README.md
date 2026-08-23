@@ -9,12 +9,9 @@ It combines the power and simplicity of [`fogleman/gg`](https://github.com/fogle
 
 ## Features
 
-- **Processing / p5.js-like workflow**: Familiar `Setup` and `Draw` loop structure.
-- **Top-left origin coordinate system**: Natural 2D coordinate system matching standard Canvas & Processing conventions.
-- **Embedded `gg.Context`**: Full 2D vector drawing capabilities (shapes, curves, paths, colors, text, transformations).
-- **Zero-dependency user API**: Built-in keyboard/mouse keys and helpers (`canvas.KeyUp`, `canvas.MouseLeft`, `canvas.V(x, y)`).
-- **Time & Frame helpers**: `ctx.FrameCount`, `ctx.DeltaTime`, `ctx.Time`.
-- **Creative coding math utilities**: `canvas.Map`, `canvas.Lerp`, `canvas.Constrain`, `canvas.Dist`, `canvas.Random`, `canvas.Radians`, `canvas.Degrees`.
+- **Simple & Intuitive**: Start animating with familiar `Setup` and `Draw` callbacks—no window or loop boilerplate.
+- **Rich 2D Vector Drawing**: Full 2D vector graphics (shapes, paths, text, images, colors, and transformations) powered by [`gg`](https://github.com/fogleman/gg).
+- **Interactive**: Built-in mouse and keyboard handling for interactive sketches, simulations, and creative coding.
 
 ## Installation
 
