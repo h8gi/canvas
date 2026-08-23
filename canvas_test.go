@@ -345,6 +345,51 @@ func TestCanvas_NoLoop_FirstFrame(t *testing.T) {
 	}
 }
 
+func TestCanvas_EventCallbacks(t *testing.T) {
+	c := NewCanvas(nil)
+
+	keyPressedCount := 0
+	c.KeyPressed(func(ctx *Context, k Key) {
+		keyPressedCount++
+	})
+
+	mousePressedCount := 0
+	c.MousePressed(func(ctx *Context, btn MouseButton) {
+		mousePressedCount++
+	})
+
+	mouseMovedCount := 0
+	c.MouseMoved(func(ctx *Context, pos Vec) {
+		mouseMovedCount++
+	})
+
+	if c.keyPressedFunc == nil {
+		t.Error("expected keyPressedFunc to be set")
+	}
+	if c.mousePressedFunc == nil {
+		t.Error("expected mousePressedFunc to be set")
+	}
+	if c.mouseMovedFunc == nil {
+		t.Error("expected mouseMovedFunc to be set")
+	}
+
+	c.keyPressedFunc(c.context, KeySpace)
+	if keyPressedCount != 1 {
+		t.Errorf("expected keyPressedCount 1, got %d", keyPressedCount)
+	}
+
+	c.mousePressedFunc(c.context, MouseLeft)
+	if mousePressedCount != 1 {
+		t.Errorf("expected mousePressedCount 1, got %d", mousePressedCount)
+	}
+
+	c.mouseMovedFunc(c.context, V(100, 200))
+	if mouseMovedCount != 1 {
+		t.Errorf("expected mouseMovedCount 1, got %d", mouseMovedCount)
+	}
+}
+
+
 
 
 
