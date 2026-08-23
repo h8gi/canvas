@@ -124,3 +124,47 @@ func Noise2D(x, y float64) float64 {
 func Noise1D(x float64) float64 {
 	return Noise(x, 0, 0)
 }
+
+// NoiseFBM calculates 2D Fractal Brownian Motion (octave Perlin noise) normalized to [0.0, 1.0].
+// octaves is the number of noise layers (e.g. 4-8).
+// persistence controls how amplitude decreases per octave (typically ~0.5).
+// lacunarity controls how frequency increases per octave (typically ~2.0).
+func NoiseFBM(x, y float64, octaves int, persistence, lacunarity float64) float64 {
+	if octaves <= 0 {
+		return 0
+	}
+	var total, maxVal, amplitude, freq float64 = 0, 0, 1.0, 1.0
+	for i := 0; i < octaves; i++ {
+		total += Noise2D(x*freq, y*freq) * amplitude
+		maxVal += amplitude
+		amplitude *= persistence
+		freq *= lacunarity
+	}
+	if maxVal == 0 {
+		return 0
+	}
+	return Constrain(total/maxVal, 0.0, 1.0)
+}
+
+// NoiseFBM3D calculates 3D Fractal Brownian Motion (octave Perlin noise) normalized to [0.0, 1.0].
+func NoiseFBM3D(x, y, z float64, octaves int, persistence, lacunarity float64) float64 {
+	if octaves <= 0 {
+		return 0
+	}
+	var total, maxVal, amplitude, freq float64 = 0, 0, 1.0, 1.0
+	for i := 0; i < octaves; i++ {
+		total += Noise(x*freq, y*freq, z*freq) * amplitude
+		maxVal += amplitude
+		amplitude *= persistence
+		freq *= lacunarity
+	}
+	if maxVal == 0 {
+		return 0
+	}
+	return Constrain(total/maxVal, 0.0, 1.0)
+}
+
+// NoiseFBM1D calculates 1D Fractal Brownian Motion (octave Perlin noise) normalized to [0.0, 1.0].
+func NoiseFBM1D(x float64, octaves int, persistence, lacunarity float64) float64 {
+	return NoiseFBM(x, 0, octaves, persistence, lacunarity)
+}

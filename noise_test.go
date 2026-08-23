@@ -57,4 +57,29 @@ func TestNoise(t *testing.T) {
 			t.Errorf("Expected different noise output for different seeds, both were %v", val1)
 		}
 	})
+
+	t.Run("FBM Noise", func(t *testing.T) {
+		for x := 0.0; x <= 5.0; x += 0.5 {
+			for y := 0.0; y <= 5.0; y += 0.5 {
+				v2D := NoiseFBM(x, y, 4, 0.5, 2.0)
+				if v2D < 0.0 || v2D > 1.0 {
+					t.Fatalf("NoiseFBM out of bounds: %v", v2D)
+				}
+				v3D := NoiseFBM3D(x, y, 1.0, 4, 0.5, 2.0)
+				if v3D < 0.0 || v3D > 1.0 {
+					t.Fatalf("NoiseFBM3D out of bounds: %v", v3D)
+				}
+			}
+		}
+
+		v1D := NoiseFBM1D(3.5, 4, 0.5, 2.0)
+		if v1D < 0.0 || v1D > 1.0 {
+			t.Fatalf("NoiseFBM1D out of bounds: %v", v1D)
+		}
+
+		// Edge case: octaves <= 0
+		if NoiseFBM(1.0, 1.0, 0, 0.5, 2.0) != 0 {
+			t.Errorf("Expected 0 for 0 octaves")
+		}
+	})
 }
