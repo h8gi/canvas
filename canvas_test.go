@@ -288,5 +288,47 @@ func TestContext_SaveFrame(t *testing.T) {
 	}
 }
 
+func TestCanvas_LoopControl(t *testing.T) {
+	c := NewCanvas(nil)
+	if !c.IsLooping() {
+		t.Error("expected canvas to be looping by default")
+	}
+
+	c.NoLoop()
+	if c.IsLooping() {
+		t.Error("expected canvas not to be looping after NoLoop()")
+	}
+
+	c.Loop()
+	if !c.IsLooping() {
+		t.Error("expected canvas to be looping after Loop()")
+	}
+
+	c.NoLoop()
+	c.Redraw()
+	if !c.redrawReq {
+		t.Error("expected redrawReq to be true after Redraw()")
+	}
+}
+
+func TestCanvas_ConfigOptions(t *testing.T) {
+	cfg := &CanvasConfig{
+		Width:      800,
+		Height:     600,
+		FrameRate:  60,
+		Title:      "Extended Config",
+		Resizable:  true,
+		Fullscreen: true,
+	}
+	c := NewCanvas(cfg)
+	if !c.resizable {
+		t.Error("expected resizable to be true")
+	}
+	if !c.fullscreen {
+		t.Error("expected fullscreen to be true")
+	}
+}
+
+
 
 

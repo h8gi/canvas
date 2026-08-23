@@ -67,6 +67,7 @@ Check the [examples](examples) directory for complete programs:
 - [`lifegame`](examples/lifegame): Conway's Game of Life simulation.
 - [`noise-landscape`](examples/noise-landscape): Organic wave animation with Perlin noise.
 - [`rotate-objects`](examples/rotate-objects): Coordinate system rotation and object transformations.
+- [`static-art`](examples/static-art): Single-frame generative art using `NoLoop()`.
 - [`text`](examples/text): Text rendering, time tracking, and frame rate display.
 
 ## Built With
