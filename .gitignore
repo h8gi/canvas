@@ -96,8 +96,13 @@ flycheck_*.el
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# Generated media / recordings (except assets/)
+*.png
+*.gif
+!assets/*.png
+!assets/*.gif
+
 # Dependency directories (remove the comment below to include it)
 vendor/
-
 
 README.html
