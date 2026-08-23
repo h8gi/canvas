@@ -62,4 +62,36 @@ func TestMathUtilities(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("RandomGaussian", func(t *testing.T) {
+		RandomSeed(42)
+		val := RandomGaussian(0, 1)
+		if math.IsNaN(val) || math.IsInf(val, 0) {
+			t.Errorf("RandomGaussian returned invalid value: %v", val)
+		}
+	})
+
+	t.Run("Vector Helpers", func(t *testing.T) {
+		v0 := FromAngle(0)
+		if math.Abs(v0.X-1.0) > 1e-9 || math.Abs(v0.Y-0.0) > 1e-9 {
+			t.Errorf("FromAngle(0) expected (1, 0), got %+v", v0)
+		}
+
+		vPi2 := FromAngle(math.Pi / 2)
+		if math.Abs(vPi2.X-0.0) > 1e-9 || math.Abs(vPi2.Y-1.0) > 1e-9 {
+			t.Errorf("FromAngle(pi/2) expected (0, 1), got %+v", vPi2)
+		}
+
+		heading := Heading(vPi2)
+		if math.Abs(heading-math.Pi/2) > 1e-9 {
+			t.Errorf("Heading expected pi/2, got %v", heading)
+		}
+
+		vRand := Random2D()
+		length := math.Hypot(vRand.X, vRand.Y)
+		if math.Abs(length-1.0) > 1e-9 {
+			t.Errorf("Random2D expected length 1.0, got %v", length)
+		}
+	})
 }
+

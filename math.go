@@ -52,3 +52,29 @@ func Random(min, max float64) float64 {
 func RandomRange(max float64) float64 {
 	return rand.Float64() * max
 }
+
+// RandomSeed sets the seed for the pseudo-random number generator.
+func RandomSeed(seed int64) {
+	rand.Seed(seed)
+}
+
+// RandomGaussian returns a pseudo-random float64 from a Gaussian (normal) distribution
+// with the specified mean and standard deviation (stdDev).
+func RandomGaussian(mean, stdDev float64) float64 {
+	return rand.NormFloat64()*stdDev + mean
+}
+
+// FromAngle returns a 2D unit vector pointing in the direction of the given angle in radians.
+func FromAngle(rad float64) Vec {
+	return V(math.Cos(rad), math.Sin(rad))
+}
+
+// Random2D returns a random 2D unit vector.
+func Random2D() Vec {
+	return FromAngle(rand.Float64() * math.Pi * 2.0)
+}
+
+// Heading returns the angle of rotation (in radians) for the vector.
+func Heading(v Vec) float64 {
+	return math.Atan2(v.Y, v.X)
+}
