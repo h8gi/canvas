@@ -453,6 +453,17 @@ func TestCanvas_EventCallbacks(t *testing.T) {
 	c.OnWindowResized(func(ctx *Context, w, h int) {})
 }
 
+func BenchmarkFlipV(b *testing.B) {
+	w, h := 1920, 1080
+	src := make([]uint8, w*h*4)
+	dst := make([]uint8, w*h*4)
+	b.SetBytes(int64(len(src)))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		flipV(src, dst, w, h)
+	}
+}
+
 
 
 
