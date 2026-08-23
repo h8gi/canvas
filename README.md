@@ -65,6 +65,8 @@ func main() {
 | Perlin Flow Field | Noise Landscape | Generative Grid |
 | :---: | :---: | :---: |
 | ![Flow Field](assets/preview-flowfield.png) | ![Noise Landscape](assets/preview-noise-landscape.png) | ![Static Art](assets/preview-static-art.png) |
+| **Boids Flocking** | **Fractal Tree** | **Particle Fountain** |
+| ![Boids](assets/preview-boids.png) | ![Fractal Tree](assets/preview-fractal-tree.png) | ![Particles](assets/preview-particles.png) |
 
 ## Examples
 
