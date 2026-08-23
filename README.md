@@ -59,11 +59,18 @@ func main() {
 }
 ```
 
+## Showcase
+
+| Perlin Flow Field | Noise Landscape | Generative Grid |
+| :---: | :---: | :---: |
+| ![Flow Field](assets/preview-flowfield.png) | ![Noise Landscape](assets/preview-noise-landscape.png) | ![Static Art](assets/preview-static-art.png) |
+
 ## Examples
 
 Check the [examples](examples) directory for complete programs:
 
 - [`drawline`](examples/drawline): Interactive mouse drawing and key interactions.
+- [`flow-field`](examples/flow-field): Organic flow field particles using HSB color and Perlin noise.
 - [`lifegame`](examples/lifegame): Conway's Game of Life simulation.
 - [`noise-landscape`](examples/noise-landscape): Organic wave animation with Perlin noise.
 - [`rotate-objects`](examples/rotate-objects): Coordinate system rotation and object transformations.
