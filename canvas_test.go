@@ -423,6 +423,34 @@ func TestCanvas_EventCallbacks(t *testing.T) {
 	if mouseMovedCount != 1 {
 		t.Errorf("expected mouseMovedCount 1, got %d", mouseMovedCount)
 	}
+
+	mouseScrolledCount := 0
+	c.MouseScrolled(func(ctx *Context, scroll Vec) {
+		mouseScrolledCount++
+	})
+	if c.mouseScrolledFunc == nil {
+		t.Error("expected mouseScrolledFunc to be set")
+	}
+	c.mouseScrolledFunc(c.context, V(0, 1))
+	if mouseScrolledCount != 1 {
+		t.Errorf("expected mouseScrolledCount 1, got %d", mouseScrolledCount)
+	}
+
+	windowResizedCount := 0
+	c.WindowResized(func(ctx *Context, w, h int) {
+		windowResizedCount++
+	})
+	if c.windowResizedFunc == nil {
+		t.Error("expected windowResizedFunc to be set")
+	}
+	c.windowResizedFunc(c.context, 1024, 768)
+	if windowResizedCount != 1 {
+		t.Errorf("expected windowResizedCount 1, got %d", windowResizedCount)
+	}
+
+	// Test aliases
+	c.OnMouseScrolled(func(ctx *Context, scroll Vec) {})
+	c.OnWindowResized(func(ctx *Context, w, h int) {})
 }
 
 
