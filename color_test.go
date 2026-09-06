@@ -87,6 +87,44 @@ func TestColorUtilities(t *testing.T) {
 		if cMid.R != 127 && cMid.R != 128 {
 			t.Errorf("LerpColor amt 0.5 expected ~128, got %+v", cMid)
 		}
+
+		tests := []struct {
+			name string
+			c1   color.Color
+			c2   color.Color
+			amt  float64
+			want color.RGBA
+		}{
+			{
+				name: "semi-transparent NRGBA",
+				c1:   color.NRGBA{R: 240, G: 120, B: 40, A: 128},
+				c2:   color.Gray{Y: 32},
+				amt:  0.5,
+				want: color.RGBA{R: 136, G: 76, B: 36, A: 192},
+			},
+			{
+				name: "premultiplied RGBA",
+				c1:   color.RGBA{R: 128, A: 128},
+				c2:   color.RGBA{B: 64, A: 64},
+				amt:  0.5,
+				want: color.RGBA{R: 128, B: 128, A: 96},
+			},
+			{
+				name: "zero alpha",
+				c1:   color.Alpha{},
+				c2:   color.White,
+				amt:  0,
+				want: color.RGBA{},
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				if got := LerpColor(tt.c1, tt.c2, tt.amt); got != tt.want {
+					t.Errorf("LerpColor() = %+v, want %+v", got, tt.want)
+				}
+			})
+		}
 	})
 }
 
