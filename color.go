@@ -139,5 +139,5 @@ func LerpColor(c1, c2 color.Color, amt float64) color.RGBA {
 	b := uint8(math.Round(float64(rgba1.B) + amt*(float64(rgba2.B)-float64(rgba1.B))))
 	a := uint8(math.Round(float64(rgba1.A) + amt*(float64(rgba2.A)-float64(rgba1.A))))
 
-	return color.RGBA{R: r, G: g, B: b, A: a}
+	return color.RGBAModel.Convert(color.NRGBA{R: r, G: g, B: b, A: a}).(color.RGBA)
 }
