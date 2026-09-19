@@ -28,6 +28,7 @@ type Canvas struct {
 	initFunc          func()
 	drawFunc          func()
 	keyPressedFunc    func(*Context, Key)
+	keyTypedFunc      func(*Context, rune)
 	keyReleasedFunc   func(*Context, Key)
 	mousePressedFunc  func(*Context, MouseButton)
 	mouseReleasedFunc func(*Context, MouseButton)
@@ -36,6 +37,9 @@ type Canvas struct {
 	windowResizedFunc func(*Context, int, int)
 	context           *Context
 	recorder          *gifRecorder
+	win              *opengl.Window
+	cursorType       pixel.CursorType
+	mouseVisible     bool
 	mu                sync.Mutex
 }
 
@@ -148,6 +152,16 @@ func (c *Canvas) OnKeyPressed(fn func(*Context, Key)) {
 	c.KeyPressed(fn)
 }
 
+// KeyTyped registers a callback invoked when a text character is typed.
+func (c *Canvas) KeyTyped(fn func(*Context, rune)) {
+	c.keyTypedFunc = fn
+}
+
+// OnKeyTyped is an alias for KeyTyped.
+func (c *Canvas) OnKeyTyped(fn func(*Context, rune)) {
+	c.KeyTyped(fn)
+}
+
 // KeyReleased registers a callback invoked when a keyboard key is released.
 func (c *Canvas) KeyReleased(fn func(*Context, Key)) {
 	c.keyReleasedFunc = fn
@@ -208,6 +222,36 @@ func (c *Canvas) OnWindowResized(fn func(*Context, int, int)) {
 	c.WindowResized(fn)
 }
 
+// SetCursor sets the mouse cursor shape.
+func (c *Canvas) SetCursor(cursorType pixel.CursorType) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.cursorType = cursorType
+	if c.win != nil {
+		c.win.Cursor(cursorType)
+	}
+}
+
+// HideCursor hides the mouse cursor.
+func (c *Canvas) HideCursor() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.mouseVisible = false
+	if c.win != nil {
+		c.win.SetMouseVisible(false)
+	}
+}
+
+// ShowCursor shows the mouse cursor.
+func (c *Canvas) ShowCursor() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.mouseVisible = true
+	if c.win != nil {
+		c.win.SetMouseVisible(true)
+	}
+}
+
 // Setup registers an initialization function that runs once before the draw loop starts.
 func (c *Canvas) Setup(initializer func(*Context)) {
 	c.initFunc = func() {
@@ -244,6 +288,11 @@ func (c *Canvas) startLoop() {
 	if err != nil {
 		panic(err)
 	}
+	c.mu.Lock()
+	c.win = win
+	c.win.Cursor(c.cursorType)
+	c.win.SetMouseVisible(c.mouseVisible)
+	c.mu.Unlock()
 	c.context.justPressed = win.JustPressed
 	c.context.pressed = win.Pressed
 	c.context.justReleased = win.JustReleased
@@ -282,6 +331,11 @@ func (c *Canvas) startLoop() {
 				if win.JustReleased(k) {
 					c.keyReleasedFunc(c.context, k)
 				}
+			}
+		}
+		for _, r := range win.Typed() {
+			if c.keyTypedFunc != nil {
+				c.keyTypedFunc(c.context, r)
 			}
 		}
 
